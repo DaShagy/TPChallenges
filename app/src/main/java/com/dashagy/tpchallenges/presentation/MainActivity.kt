@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import com.bumptech.glide.Glide
+import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
+import com.dashagy.tpchallenges.data.database.entities.RoomMovie
 import com.dashagy.tpchallenges.utils.Constants
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
@@ -15,6 +17,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
+    //Room
+    private val db by lazy { TPChallengesDatabase.getInstance(this) }
 
     //Retrofit
     private val retrofit = Retrofit.Builder()
@@ -57,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         query?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 val movieResponse = theMovieDatabaseAPI.searchMovieByName(query)
+                for (movie in movieResponse.body()?.movies ?: listOf()) {
+                    insertMovieInDatabase(movie.toDatabaseMovie())
+                }
                 withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()?.movies?.first()?.toMovie()) }
             }
         }
@@ -70,6 +77,10 @@ class MainActivity : AppCompatActivity() {
                 Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}").into(binding.ivMoviePoster)
             }
         }
+    }
+
+    private suspend fun insertMovieInDatabase(movie: RoomMovie) {
+        db.movieDao().insertMovie(movie)
     }
 
     private fun hideKeyboard() {
