@@ -8,8 +8,8 @@ import com.dashagy.tpchallenges.data.database.entities.RoomMovie
 
 @Dao
 interface MovieDao {
-    @Query("SELECT * FROM Movies")
-    suspend fun getMovies(): List<RoomMovie>
+    @Query("SELECT * FROM Movies WHERE title LIKE '%' || :query || '%'")
+    suspend fun searchMovieByName(query: String): List<RoomMovie>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: RoomMovie)
