@@ -1,4 +1,4 @@
-package com.dashagy.tpchallenges
+package com.dashagy.tpchallenges.presentation
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import com.bumptech.glide.Glide
+import com.dashagy.tpchallenges.utils.Constants
+import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
+import com.dashagy.tpchallenges.domain.entities.Movie
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val movieResponse = theMovieDatabaseAPI.getMovieById(111)
-            withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()) }
+            withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()?.toMovie()) }
         }
 
         binding.svMovie.setOnQueryTextListener(
@@ -54,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         query?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 val movieResponse = theMovieDatabaseAPI.searchMovieByName(query)
-                withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()?.movies?.first()) }
+                withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()?.movies?.first()?.toMovie()) }
             }
         }
     }
@@ -63,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         movie?.let {
             binding.tvMovieTitle.text = "Title: ${it.title}, Id: ${it.id}"
             binding.tvMovieOverview.text = "Overview: ${it.overview}"
-            it.posterPath?.let { imagePath ->
+            it.poster?.let { imagePath ->
                 Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}").into(binding.ivMoviePoster)
             }
         }
