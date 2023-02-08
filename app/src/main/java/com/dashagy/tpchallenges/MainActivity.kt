@@ -2,6 +2,7 @@ package com.dashagy.tpchallenges
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
         CoroutineScope(Dispatchers.IO).launch {
-            val movieResponse = theMovieDatabaseAPI.getMovieById(550)
+            val movieResponse = theMovieDatabaseAPI.getMovieById(111)
             withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()) }
         }
 
@@ -35,8 +36,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateShownMovie(movie: Movie?) {
         movie?.let {
-            binding.tvMovieTitle.text = "Title: ${it.title}, Id: ${it.id}, poster path: ${it.posterPath}"
+            binding.tvMovieTitle.text = "Title: ${it.title}, Id: ${it.id}"
             binding.tvMovieOverview.text = "Overview: ${it.overview}"
+            it.posterPath?.let { imagePath ->
+                Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}").into(binding.ivMoviePoster)
+            }
         }
     }
 }
