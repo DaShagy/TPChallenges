@@ -1,7 +1,10 @@
 package com.dashagy.tpchallenges
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
+import android.widget.SearchView
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
@@ -31,7 +34,29 @@ class MainActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()) }
         }
 
+        binding.svMovie.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    searchMovie(query)
+                    hideKeyboard()
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return false
+                }
+            })
+
         setContentView(binding.root)
+    }
+
+    private fun searchMovie(query: String?) {
+        query?.let {
+            CoroutineScope(Dispatchers.IO).launch {
+                val movieResponse = theMovieDatabaseAPI.searchMovieByName(query)
+                withContext(Dispatchers.Main) { if (movieResponse.isSuccessful) updateShownMovie(movieResponse.body()?.movies?.first()) }
+            }
+        }
     }
 
     private fun updateShownMovie(movie: Movie?) {
@@ -41,6 +66,12 @@ class MainActivity : AppCompatActivity() {
             it.posterPath?.let { imagePath ->
                 Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}").into(binding.ivMoviePoster)
             }
+        }
+    }
+
+    private fun hideKeyboard() {
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).apply {
+            hideSoftInputFromWindow(binding.root.windowToken, 0)
         }
     }
 }
