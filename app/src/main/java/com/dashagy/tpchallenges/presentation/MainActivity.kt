@@ -1,7 +1,6 @@
 package com.dashagy.tpchallenges.presentation
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -11,10 +10,8 @@ import android.widget.SearchView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
 import com.dashagy.tpchallenges.R
+import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
 import com.dashagy.tpchallenges.data.database.entities.RoomMovie
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
@@ -27,17 +24,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
-    //Room
-    private val db by lazy { TPChallengesDatabase.getInstance(this) }
 
-    //Retrofit
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(Constants.API_BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    //Api service
-    private val theMovieDatabaseAPI: TheMovieDatabaseAPI = retrofit.create(TheMovieDatabaseAPI::class.java)
+    private lateinit var database: TPChallengesDatabase
+    private lateinit var api: TheMovieDatabaseAPI
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
@@ -47,9 +36,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
+        database = (application as TPChallengesApplication).database
+        api = (application as TPChallengesApplication).theMovieDatabaseAPI
+
         CoroutineScope(Dispatchers.IO).launch {
             if (isOnline()) {
-                val movieResponse = theMovieDatabaseAPI.getMovieById(111)
+                val movieResponse = api.getMovieById(111)
                 withContext(Dispatchers.Main) {
                     if (movieResponse.isSuccessful) updateShownMovie(
                         movieResponse.body()?.toMovie()
@@ -80,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         query?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 if (isOnline()) {
-                    val movieResponse = theMovieDatabaseAPI.searchMovieByName(query)
+                    val movieResponse = api.searchMovieByName(query)
                     for (movie in movieResponse.body()?.movies ?: listOf()) {
                         insertMovieInDatabase(movie.toDatabaseMovie())
                     }
@@ -91,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        val movieList = db.movieDao().searchMovieByName(query)
+                        val movieList = database.movieDao().searchMovieByName(query)
                         if (movieList.isNotEmpty()) {
                             updateShownMovie(movieList.first().toMovie())
                         }
@@ -112,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun insertMovieInDatabase(movie: RoomMovie) {
-        db.movieDao().insertMovie(movie)
+        database.movieDao().insertMovie(movie)
     }
 
     private fun hideKeyboard() {
