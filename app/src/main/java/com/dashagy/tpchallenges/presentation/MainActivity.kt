@@ -12,21 +12,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.TPChallengesApplication
-import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
-import com.dashagy.tpchallenges.data.database.entities.RoomMovie
-import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.domain.entities.Movie
+import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
+import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Constants
 import kotlinx.coroutines.*
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var database: TPChallengesDatabase
-    private lateinit var api: TheMovieDatabaseAPI
+    private lateinit var searchMoviesUseCase: SearchMoviesUseCase
+    private lateinit var getMovieByIdUseCase: GetMovieByIdUseCase
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
@@ -36,17 +33,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
-        database = (application as TPChallengesApplication).database
-        api = (application as TPChallengesApplication).theMovieDatabaseAPI
+        searchMoviesUseCase = (application as TPChallengesApplication).searchMoviesUseCase
+        getMovieByIdUseCase = (application as TPChallengesApplication).getMovieByIdUseCase
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (isOnline()) {
-                val movieResponse = api.getMovieById(111)
-                withContext(Dispatchers.Main) {
-                    if (movieResponse.isSuccessful) updateShownMovie(
-                        movieResponse.body()?.toMovie()
-                    )
-                }
+            val movie = getMovieByIdUseCase(111, isOnline())
+            withContext(Dispatchers.Main) {
+                updateShownMovie(movie)
             }
         }
 
@@ -69,26 +62,10 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun searchMovie(query: String?) {
-        query?.let {
-            CoroutineScope(Dispatchers.IO).launch {
-                if (isOnline()) {
-                    val movieResponse = api.searchMovieByName(query)
-                    for (movie in movieResponse.body()?.movies ?: listOf()) {
-                        insertMovieInDatabase(movie.toDatabaseMovie())
-                    }
-                    withContext(Dispatchers.Main) {
-                        if (movieResponse.isSuccessful) updateShownMovie(
-                            movieResponse.body()?.movies?.first()?.toMovie()
-                        )
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        val movieList = database.movieDao().searchMovieByName(query)
-                        if (movieList.isNotEmpty()) {
-                            updateShownMovie(movieList.first().toMovie())
-                        }
-                    }
-                }
+        CoroutineScope(Dispatchers.IO).launch {
+            val movies = searchMoviesUseCase(query, isOnline())
+            withContext(Dispatchers.Main) {
+                updateShownMovie(movies.firstOrNull())
             }
         }
     }
@@ -101,10 +78,6 @@ class MainActivity : AppCompatActivity() {
                 Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}").error(R.drawable.ic_baseline_image_not_supported_24).into(binding.ivMoviePoster)
             }
         }
-    }
-
-    private suspend fun insertMovieInDatabase(movie: RoomMovie) {
-        database.movieDao().insertMovie(movie)
     }
 
     private fun hideKeyboard() {

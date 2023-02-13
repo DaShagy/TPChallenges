@@ -13,4 +13,7 @@ interface MovieDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: RoomMovie)
+
+    @Query("SELECT * FROM Movies WHERE id = :id")
+    suspend fun getMovieById(id: Int): RoomMovie
 }
