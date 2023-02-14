@@ -16,16 +16,22 @@ import retrofit2.converter.gson.GsonConverterFactory
 class TPChallengesApplication: Application() {
 
     //Room
-    private val database = TPChallengesDatabase.getInstance(this)
+    private val database by lazy {
+        TPChallengesDatabase.getInstance(this)
+    }
 
     //Retrofit
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(Constants.API_BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    private val retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(Constants.API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
     //Api service
-    private val theMovieDatabaseAPI: TheMovieDatabaseAPI = retrofit.create(TheMovieDatabaseAPI::class.java)
+    private val theMovieDatabaseAPI: TheMovieDatabaseAPI by lazy {
+        retrofit.create(TheMovieDatabaseAPI::class.java)
+    }
 
     val searchMoviesUseCase get() = SearchMoviesUseCase(theMovieDatabaseAPI, database)
     val getMovieByIdUseCase get() = GetMovieByIdUseCase(theMovieDatabaseAPI, database)
