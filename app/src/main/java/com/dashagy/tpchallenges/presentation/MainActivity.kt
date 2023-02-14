@@ -13,6 +13,7 @@ import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
 import com.dashagy.tpchallenges.utils.Constants
+import com.dashagy.tpchallenges.utils.loadImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,11 +68,7 @@ class MainActivity : AppCompatActivity() {
                 state.movies.firstOrNull()?.let {
                     binding.tvMovieTitle.text = "Title: ${it.title}, Id: ${it.id}"
                     binding.tvMovieOverview.text = "Overview: ${it.overview}"
-                    it.poster?.let { imagePath ->
-                        Glide.with(this).load("${Constants.API_IMAGE_BASE_URL}${imagePath}")
-                            .error(R.drawable.ic_baseline_image_not_supported_24)
-                            .into(binding.ivMoviePoster)
-                    }
+                    binding.ivMoviePoster.loadImage(this, it.poster)
                 }
             }
         }
