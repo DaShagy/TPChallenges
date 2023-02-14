@@ -9,8 +9,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.R
+import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
-import com.dashagy.tpchallenges.presentation.model.MoviesViewModel
+import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
 import com.dashagy.tpchallenges.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -50,11 +51,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun searchMovie(query: String?) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.searchMovie(query)
+        moviesViewModel.searchMovie(query, (application as TPChallengesApplication).isDeviceOnline)
     }
 
     private fun getMovieById(id: Int) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.getMovieById(id)
+        moviesViewModel.getMovieById(id, (application as TPChallengesApplication).isDeviceOnline)
     }
 
     private fun updateShownMovie(state: MoviesViewModel.MovieState) {

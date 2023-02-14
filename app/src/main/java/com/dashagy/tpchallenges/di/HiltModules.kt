@@ -1,13 +1,14 @@
 package com.dashagy.tpchallenges.di
 
-import android.app.Application
 import android.content.Context
 import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
-import com.dashagy.tpchallenges.data.database.daos.MovieDao
+import com.dashagy.tpchallenges.data.repository.MoviesRepositoryImpl
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
+import com.dashagy.tpchallenges.domain.repository.MoviesRepository
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Constants
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,11 +22,12 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
 
     @Singleton
     @Provides
-    fun provideMoviesDatabase(@ApplicationContext app: Context) = TPChallengesDatabase.getInstance(app)
+    fun provideMoviesDatabase(@ApplicationContext app: Context) =
+        TPChallengesDatabase.getInstance(app)
 
     @Singleton
     @Provides
@@ -47,13 +49,21 @@ class AppModule {
 
 @Module
 @InstallIn(ViewModelComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    abstract fun bindMoviesRepository(moviesRepository: MoviesRepositoryImpl): MoviesRepository
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
 object UseCasesModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGetMovieByIdUseCase(api: TheMovieDatabaseAPI, movieDao: MovieDao) = GetMovieByIdUseCase(api, movieDao)
+    fun provideGetMovieByIdUseCase(repository: MoviesRepository) = GetMovieByIdUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideSearchMovieUseCase(api: TheMovieDatabaseAPI, movieDao: MovieDao) = SearchMoviesUseCase(api, movieDao)
+    fun provideSearchMovieUseCase(repository: MoviesRepository) = SearchMoviesUseCase(repository)
 }

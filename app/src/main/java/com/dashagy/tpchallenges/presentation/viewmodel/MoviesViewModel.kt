@@ -1,23 +1,21 @@
-package com.dashagy.tpchallenges.presentation.model
+package com.dashagy.tpchallenges.presentation.viewmodel
 
-import android.app.Application
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-//TODO Take out app as constructor parameter
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
-    private val app: Application,
+    @ApplicationContext app: Context,
     private val getMovieByIdUseCase: GetMovieByIdUseCase,
     private val searchMoviesUseCase: SearchMoviesUseCase
 ): ViewModel() {
@@ -26,21 +24,21 @@ class MoviesViewModel @Inject constructor(
     val movieState: LiveData<MovieState>
         get() = _movieState
 
-    suspend fun getMovieById(id: Int) {
+    suspend fun getMovieById(id: Int, isDeviceOnline: Boolean) {
         _movieState.value = MovieState.Loading
 
         val result = withContext(Dispatchers.IO) {
-            return@withContext getMovieByIdUseCase(id, (app as TPChallengesApplication).isDeviceOnline)
+            return@withContext getMovieByIdUseCase(id, isDeviceOnline)
         }
 
         _movieState.value = MovieState.Success(listOf(result))
     }
 
-    suspend fun searchMovie(query: String?) {
+    suspend fun searchMovie(query: String?, isDeviceOnline: Boolean) {
         _movieState.value = MovieState.Loading
 
         val result = withContext(Dispatchers.IO) {
-            return@withContext searchMoviesUseCase(query, (app as TPChallengesApplication).isDeviceOnline)
+            return@withContext searchMoviesUseCase(query, isDeviceOnline)
         }
 
         _movieState.value = MovieState.Success(result)
