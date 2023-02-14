@@ -1,12 +1,14 @@
 package com.dashagy.tpchallenges.domain.useCases
 
 import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
+import com.dashagy.tpchallenges.data.database.daos.MovieDao
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.domain.entities.Movie
+import javax.inject.Inject
 
-class SearchMoviesUseCase(
+class SearchMoviesUseCase @Inject constructor(
     private val api: TheMovieDatabaseAPI,
-    private val database: TPChallengesDatabase
+    private val movieDao: MovieDao
 ) {
     suspend operator fun invoke(query: String?, isOnline: Boolean): List<Movie> {
         var result = listOf<Movie>()
@@ -14,13 +16,13 @@ class SearchMoviesUseCase(
             if (isOnline) {
                 val movieResponse = api.searchMovieByName(query)
                 for (movie in movieResponse.body()?.movies ?: listOf()) {
-                    database.movieDao().insertMovie(movie.toDatabaseMovie())
+                    movieDao.insertMovie(movie.toDatabaseMovie())
                 }
                 if (movieResponse.isSuccessful)
                     result = movieResponse.body()?.movies?.map { it.toMovie() }
                         ?: listOf()
             } else {
-                result = database.movieDao().searchMovieByName(query).map { it.toMovie() }
+                result = movieDao.searchMovieByName(query).map { it.toMovie() }
             }
         }
         return result

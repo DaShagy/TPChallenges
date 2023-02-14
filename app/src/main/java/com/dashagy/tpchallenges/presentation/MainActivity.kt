@@ -5,19 +5,22 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.model.MoviesViewModel
 import com.dashagy.tpchallenges.utils.Constants
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var moviesViewModel: MoviesViewModel
+    private val moviesViewModel: MoviesViewModel by viewModels()
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
@@ -26,9 +29,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
-        moviesViewModel = MoviesViewModel(application).also {
-            it.movieState.observe(this, ::updateShownMovie)
-        }
+        moviesViewModel.movieState.observe(this, ::updateShownMovie)
 
         getMovieById(111)
 

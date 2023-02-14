@@ -1,19 +1,26 @@
 package com.dashagy.tpchallenges.presentation.model
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.domain.entities.Movie
+import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
+import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-//TODO make viewmodel application agnostic when implementing repository pattern in data layer
-class MoviesViewModel(application: Application): AndroidViewModel(application) {
 
-    private val getMovieByIdUseCase = getApplication<TPChallengesApplication>().getMovieByIdUseCase
-    private val searchMoviesUseCase = getApplication<TPChallengesApplication>().searchMoviesUseCase
+//TODO Take out app as constructor parameter
+@HiltViewModel
+class MoviesViewModel @Inject constructor(
+    private val app: Application,
+    private val getMovieByIdUseCase: GetMovieByIdUseCase,
+    private val searchMoviesUseCase: SearchMoviesUseCase
+): ViewModel() {
 
     private var _movieState: MutableLiveData<MovieState> = MutableLiveData()
     val movieState: LiveData<MovieState>
@@ -23,7 +30,7 @@ class MoviesViewModel(application: Application): AndroidViewModel(application) {
         _movieState.value = MovieState.Loading
 
         val result = withContext(Dispatchers.IO) {
-            return@withContext getMovieByIdUseCase(id, getApplication<TPChallengesApplication>().isDeviceOnline)
+            return@withContext getMovieByIdUseCase(id, (app as TPChallengesApplication).isDeviceOnline)
         }
 
         _movieState.value = MovieState.Success(listOf(result))
@@ -33,7 +40,7 @@ class MoviesViewModel(application: Application): AndroidViewModel(application) {
         _movieState.value = MovieState.Loading
 
         val result = withContext(Dispatchers.IO) {
-            return@withContext searchMoviesUseCase(query, getApplication<TPChallengesApplication>().isDeviceOnline)
+            return@withContext searchMoviesUseCase(query, (app as TPChallengesApplication).isDeviceOnline)
         }
 
         _movieState.value = MovieState.Success(result)
