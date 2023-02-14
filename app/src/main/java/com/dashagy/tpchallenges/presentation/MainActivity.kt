@@ -1,13 +1,9 @@
 package com.dashagy.tpchallenges.presentation
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.R
@@ -16,36 +12,35 @@ import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
+import com.dashagy.tpchallenges.presentation.model.MoviesModel
 import com.dashagy.tpchallenges.utils.Constants
-import kotlinx.coroutines.*
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var searchMoviesUseCase: SearchMoviesUseCase
     private lateinit var getMovieByIdUseCase: GetMovieByIdUseCase
 
+    private lateinit var moviesModel: MoviesModel
+
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
+        moviesModel = MoviesModel(applicationContext)
+
         searchMoviesUseCase = (application as TPChallengesApplication).searchMoviesUseCase
         getMovieByIdUseCase = (application as TPChallengesApplication).getMovieByIdUseCase
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val movie = getMovieByIdUseCase(111, isOnline())
-            withContext(Dispatchers.Main) {
-                updateShownMovie(movie)
-            }
-        }
+        getMovieById(111)
 
         binding.svMovie.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
-                @RequiresApi(Build.VERSION_CODES.M)
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     searchMovie(query)
                     hideKeyboard()
@@ -60,14 +55,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun searchMovie(query: String?) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val movies = searchMoviesUseCase(query, isOnline())
-            withContext(Dispatchers.Main) {
-                updateShownMovie(movies.firstOrNull())
-            }
-        }
+    private fun searchMovie(query: String?) = CoroutineScope(Dispatchers.Main).launch {
+        updateShownMovie(moviesModel.searchMovie(query).firstOrNull())
+    }
+
+    private fun getMovieById(id: Int) = CoroutineScope(Dispatchers.Main).launch {
+        updateShownMovie(moviesModel.getMovieById(id))
     }
 
     private fun updateShownMovie(movie: Movie?) {
@@ -83,18 +76,6 @@ class MainActivity : AppCompatActivity() {
     private fun hideKeyboard() {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).apply {
             hideSoftInputFromWindow(binding.root.windowToken, 0)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun isOnline(): Boolean {
-        val connectivityManager = (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-        with (connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)){
-            return if (this == null) false
-            else { hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                    || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-            }
         }
     }
 }

@@ -1,6 +1,10 @@
 package com.dashagy.tpchallenges
 
 import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
@@ -12,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class TPChallengesApplication: Application() {
 
     //Room
-    private val database get() =  TPChallengesDatabase.getInstance(this)
+    private val database = TPChallengesDatabase.getInstance(this)
 
     //Retrofit
     private val retrofit = Retrofit.Builder()
@@ -25,6 +29,20 @@ class TPChallengesApplication: Application() {
 
     val searchMoviesUseCase get() = SearchMoviesUseCase(theMovieDatabaseAPI, database)
     val getMovieByIdUseCase get() = GetMovieByIdUseCase(theMovieDatabaseAPI, database)
+
+    val isDeviceOnline: Boolean get() {
+        val connectivityManager = (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            with (connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)){
+                return if (this == null) false
+                else { hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                }
+            }
+        }
+        return false
+    }
 
     override fun onCreate() {
         super.onCreate()
