@@ -7,12 +7,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
-import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
-import com.dashagy.tpchallenges.utils.Constants
 import com.dashagy.tpchallenges.utils.loadImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope

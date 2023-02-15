@@ -1,6 +1,5 @@
 package com.dashagy.tpchallenges.presentation.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,14 +7,12 @@ import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
-    @ApplicationContext app: Context,
     private val getMovieByIdUseCase: GetMovieByIdUseCase,
     private val searchMoviesUseCase: SearchMoviesUseCase
 ): ViewModel() {

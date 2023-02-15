@@ -1,8 +1,8 @@
 package com.dashagy.tpchallenges.data.service.api
 
-import com.dashagy.tpchallenges.utils.Constants
 import com.dashagy.tpchallenges.data.service.responseSchemas.MovieListResponseSchema
 import com.dashagy.tpchallenges.data.service.responseSchemas.MovieResponseSchema
+import com.dashagy.tpchallenges.utils.Constants
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

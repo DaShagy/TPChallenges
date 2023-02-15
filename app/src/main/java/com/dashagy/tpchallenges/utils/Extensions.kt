@@ -7,7 +7,7 @@ import com.dashagy.tpchallenges.R
 
 fun ImageView.loadImage(ctx: Context, url: String?) {
     url?.let {
-        Glide.with(ctx).load("${Constants.API_IMAGE_BASE_URL}$it")
+        Glide.with(ctx).load("${Constants.API_IMAGE_BASE_URL}w500/$it")
             .error(R.drawable.ic_baseline_image_not_supported_24)
             .into(this)
     }
