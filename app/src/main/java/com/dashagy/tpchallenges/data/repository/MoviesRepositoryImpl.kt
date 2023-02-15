@@ -39,11 +39,13 @@ class MoviesRepositoryImpl @Inject constructor(
                 if (!response.isSuccessful) return Result.Error(Exception(response.message()))
 
                 val movies = response.body()?.movies
-                if (!movies.isNullOrEmpty()) {
+                return if (!movies.isNullOrEmpty()) {
                     for (movie in movies) {
                         movieDao.insertMovie(movie.toDatabaseMovie())
                     }
-                    return Result.Success(movies.map{ movie -> movie.toMovie() })
+                    Result.Success(movies.map{ movie -> movie.toMovie() })
+                } else {
+                    Result.Error(Exception("Movie not found"))
                 }
 
             } else {
