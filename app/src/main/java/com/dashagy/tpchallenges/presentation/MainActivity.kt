@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
+import com.dashagy.tpchallenges.utils.clean
 import com.dashagy.tpchallenges.utils.loadImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -32,18 +34,21 @@ class MainActivity : AppCompatActivity() {
 
         getMovieById(111)
 
-        binding.svMovie.setOnQueryTextListener(
-            object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    searchMovie(query)
-                    hideKeyboard()
-                    return false
-                }
+        binding.svMovie.apply {
+            setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        searchMovie(query)
+                        cleanSearchView(this@apply)
+                        hideKeyboard()
+                        return false
+                    }
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    return false
-                }
-            })
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        return false
+                    }
+                })
+        }
 
         setContentView(binding.root)
     }
@@ -58,14 +63,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateShownMovie(state: MoviesViewModel.MovieState) {
         when (state) {
-            MoviesViewModel.MovieState.Error -> showProgressBar()
+            is MoviesViewModel.MovieState.Error -> {
+                hideProgressBar()
+                Toast.makeText(this, state.exception.message, Toast.LENGTH_SHORT).show()
+            }
             MoviesViewModel.MovieState.Loading -> showProgressBar()
             is MoviesViewModel.MovieState.Success -> {
                 hideProgressBar()
-                state.movies.firstOrNull()?.let {
-                    binding.tvMovieTitle.text = "Title: ${it.title}, Id: ${it.id}"
-                    binding.tvMovieOverview.text = "Overview: ${it.overview}"
-                    binding.ivMoviePoster.loadImage(this, it.poster)
+                state.movies.firstOrNull()?.let { movie ->
+                    binding.tvMovieTitle.text = movie.title
+                    binding.tvMovieOverview.text = movie.overview
+                    binding.ivMoviePoster.loadImage(this, movie.poster)
                 }
             }
         }
@@ -75,6 +83,10 @@ class MainActivity : AppCompatActivity() {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).apply {
             hideSoftInputFromWindow(binding.root.windowToken, 0)
         }
+    }
+
+    private fun cleanSearchView(sv: SearchView) {
+        sv.clean()
     }
 
     private fun showProgressBar() {

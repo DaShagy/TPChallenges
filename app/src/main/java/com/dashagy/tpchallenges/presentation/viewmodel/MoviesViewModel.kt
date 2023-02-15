@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
+import com.dashagy.tpchallenges.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,7 +29,10 @@ class MoviesViewModel @Inject constructor(
             return@withContext getMovieByIdUseCase(id, isDeviceOnline)
         }
 
-        _movieState.value = MovieState.Success(listOf(result))
+        when (result){
+            is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+            is Result.Success -> _movieState.value = MovieState.Success(result.data)
+        }
     }
 
     suspend fun searchMovie(query: String?, isDeviceOnline: Boolean) {
@@ -38,12 +42,15 @@ class MoviesViewModel @Inject constructor(
             return@withContext searchMoviesUseCase(query, isDeviceOnline)
         }
 
-        _movieState.value = MovieState.Success(result)
+        when (result){
+            is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+            is Result.Success -> _movieState.value = MovieState.Success(result.data)
+        }
     }
 
     sealed class MovieState {
-        class Success(val movies: List<Movie?>): MovieState()
-        object Error: MovieState()
+        class Success(val movies: List<Movie>): MovieState()
+        class Error(val exception: Exception): MovieState()
         object Loading: MovieState()
     }
 }

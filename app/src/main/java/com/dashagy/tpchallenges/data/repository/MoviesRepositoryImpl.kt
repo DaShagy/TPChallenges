@@ -4,6 +4,7 @@ import com.dashagy.tpchallenges.data.database.daos.MovieDao
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.repository.MoviesRepository
+import com.dashagy.tpchallenges.utils.Result
 import javax.inject.Inject
 
 class MoviesRepositoryImpl @Inject constructor(
@@ -11,34 +12,45 @@ class MoviesRepositoryImpl @Inject constructor(
     private val movieDao: MovieDao
 ) : MoviesRepository {
 
-    override suspend fun getMovieById(id: Int, isOnline: Boolean): List<Movie> {
-        return if (isOnline) {
-            api.getMovieById(id).body()?.toMovie()?.let { listOf(it) } ?: listOf()
+    override suspend fun getMovieById(id: Int, isOnline: Boolean): Result<List<Movie>> {
+        if (isOnline) {
+            val response = api.getMovieById(id)
+            if (!response.isSuccessful)
+                return Result.Error(Exception(response.message()))
+
+            val movie = response.body()?.toMovie()
+
+            return if (movie == null) Result.Error(Exception("There was a problem"))
+            else Result.Success(listOf(movie))
+
         } else {
-            try {
-                listOf(movieDao.getMovieById(id).toMovie())
+            return try {
+                Result.Success(listOf(movieDao.getMovieById(id).toMovie()))
             } catch (e: Exception) {
-                listOf()
+                Result.Error(e)
             }
         }
     }
 
-    override suspend fun searchMovies(query: String?, isOnline: Boolean): List<Movie> {
-        var result = listOf<Movie>()
+    override suspend fun searchMovies(query: String?, isOnline: Boolean): Result<List<Movie>> {
         query?.let {
             if (isOnline) {
-                val movieResponse = api.searchMovieByName(query)
-                for (movie in movieResponse.body()?.movies ?: listOf()) {
-                    movieDao.insertMovie(movie.toDatabaseMovie())
+                val response = api.searchMovieByName(query)
+                if (!response.isSuccessful) return Result.Error(Exception(response.message()))
+
+                val movies = response.body()?.movies
+                if (!movies.isNullOrEmpty()) {
+                    for (movie in movies) {
+                        movieDao.insertMovie(movie.toDatabaseMovie())
+                    }
+                    return Result.Success(movies.map{ movie -> movie.toMovie() })
                 }
-                if (movieResponse.isSuccessful)
-                    result = movieResponse.body()?.movies?.map { it.toMovie() }
-                        ?: listOf()
+
             } else {
-                result = movieDao.searchMovieByName(query).map { it.toMovie() }
+                return Result.Success(movieDao.searchMovieByName(query).map { movie -> movie.toMovie() })
             }
         }
-        return result
+        return Result.Error(Exception("Query movies must not be null"))
     }
 
 }
