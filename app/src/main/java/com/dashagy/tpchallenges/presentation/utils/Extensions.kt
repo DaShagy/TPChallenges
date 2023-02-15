@@ -1,11 +1,11 @@
-package com.dashagy.tpchallenges.utils
+package com.dashagy.tpchallenges.presentation.utils
 
 import android.content.Context
 import android.widget.ImageView
-import android.widget.SearchView
-import android.widget.SearchView.OnCloseListener
+import androidx.appcompat.widget.SearchView
 import com.bumptech.glide.Glide
 import com.dashagy.tpchallenges.R
+import com.dashagy.tpchallenges.utils.Constants
 
 fun ImageView.loadImage(ctx: Context, url: String?) {
     url?.let {

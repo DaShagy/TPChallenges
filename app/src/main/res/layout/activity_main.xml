@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="gone"/>
 
-    <SearchView
+    <androidx.appcompat.widget.SearchView
         android:id="@+id/sv_movie"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,8 +56,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Description" />
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

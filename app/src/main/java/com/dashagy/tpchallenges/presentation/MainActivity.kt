@@ -4,15 +4,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.SearchView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
-import com.dashagy.tpchallenges.utils.clean
-import com.dashagy.tpchallenges.utils.loadImage
+import com.dashagy.tpchallenges.presentation.utils.clean
+import com.dashagy.tpchallenges.presentation.utils.loadImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.svMovie.apply {
             setOnQueryTextListener(
-                object : SearchView.OnQueryTextListener {
+                object : OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         searchMovie(query)
                         cleanSearchView(this@apply)
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun cleanSearchView(sv: SearchView) {
+    private fun cleanSearchView(sv: androidx.appcompat.widget.SearchView) {
         sv.clean()
     }
 

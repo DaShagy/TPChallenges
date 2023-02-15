@@ -36,7 +36,7 @@ object AppModule {
     //Retrofit
     @Singleton
     @Provides
-    fun provideRetrofit() = Retrofit.Builder()
+    fun provideRetrofit(): Retrofit = Retrofit.Builder()
         .baseUrl(Constants.API_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -44,7 +44,7 @@ object AppModule {
     //Api service
     @Singleton
     @Provides
-    fun provideApiService(retrofit: Retrofit) = retrofit.create(TheMovieDatabaseAPI::class.java)
+    fun provideApiService(retrofit: Retrofit): TheMovieDatabaseAPI = retrofit.create(TheMovieDatabaseAPI::class.java)
 }
 
 @Module
