@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
-import com.dashagy.tpchallenges.TPChallengesApplication
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
 import com.dashagy.tpchallenges.presentation.utils.clean
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             setOnQueryTextListener(
                 object : OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
-                        searchMovie(query)
+                        searchMovie(query.orEmpty())
                         cleanSearchView(this@apply)
                         hideKeyboard()
                         return false
@@ -53,12 +52,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-    private fun searchMovie(query: String?) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.searchMovie(query, (application as TPChallengesApplication).isDeviceOnline)
+    private fun searchMovie(query: String) = CoroutineScope(Dispatchers.Main).launch {
+        moviesViewModel.searchMovie(query)
     }
 
     private fun getMovieById(id: Int) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.getMovieById(id, (application as TPChallengesApplication).isDeviceOnline)
+        moviesViewModel.getMovieById(id)
     }
 
     private fun updateShownMovie(state: MoviesViewModel.MovieState) {

@@ -9,11 +9,11 @@ import com.dashagy.tpchallenges.data.database.entities.RoomMovie
 @Dao
 interface MovieDao {
     @Query("SELECT * FROM Movies WHERE title LIKE '%' || :query || '%'")
-    suspend fun searchMovieByName(query: String): List<RoomMovie>
+    fun searchMovieByName(query: String): List<RoomMovie>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMovie(movie: RoomMovie)
+    fun insertMovie(movie: RoomMovie)
 
     @Query("SELECT * FROM Movies WHERE id = :id")
-    suspend fun getMovieById(id: Int): RoomMovie
+    fun getMovieById(id: Int): List<RoomMovie>
 }

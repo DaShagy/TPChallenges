@@ -3,12 +3,14 @@ package com.dashagy.tpchallenges.presentation.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -22,31 +24,30 @@ class MoviesViewModel @Inject constructor(
     val movieState: LiveData<MovieState>
         get() = _movieState
 
-    suspend fun getMovieById(id: Int, isDeviceOnline: Boolean) {
+    fun getMovieById(id: Int) = viewModelScope.launch {
         _movieState.value = MovieState.Loading
 
-        val result = withContext(Dispatchers.IO) {
-            return@withContext getMovieByIdUseCase(id, isDeviceOnline)
-        }
-
-        when (result){
-            is Result.Error -> _movieState.value = MovieState.Error(result.exception)
-            is Result.Success -> _movieState.value = MovieState.Success(result.data)
+        withContext(Dispatchers.IO) { getMovieByIdUseCase(id) }.let { result ->
+            when (result) {
+                is Result.Success -> _movieState.value = MovieState.Success(listOf(result.data))
+                is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+            }
         }
     }
 
-    suspend fun searchMovie(query: String?, isDeviceOnline: Boolean) {
+
+    fun searchMovie(query: String) = viewModelScope.launch {
         _movieState.value = MovieState.Loading
 
-        val result = withContext(Dispatchers.IO) {
-            return@withContext searchMoviesUseCase(query, isDeviceOnline)
-        }
+        withContext(Dispatchers.IO) { searchMoviesUseCase(query) }.let { result ->
+            when (result) {
+                is Result.Success -> _movieState.value = MovieState.Success(result.data)
+                is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+            }
 
-        when (result){
-            is Result.Error -> _movieState.value = MovieState.Error(result.exception)
-            is Result.Success -> _movieState.value = MovieState.Success(result.data)
         }
     }
+
 
     sealed class MovieState {
         class Success(val movies: List<Movie>): MovieState()

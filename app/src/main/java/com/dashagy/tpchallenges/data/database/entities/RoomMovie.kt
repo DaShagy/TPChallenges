@@ -11,7 +11,4 @@ data class RoomMovie(
     @ColumnInfo(name = "title") val title: String?,
     @ColumnInfo(name = "overview") val overview: String?,
     @ColumnInfo(name = "poster_path") val poster: String?
-) {
-    //TODO use mappers
-    fun toMovie(): Movie = Movie(id, title.orEmpty(), overview.orEmpty(), poster)
-}
+)

@@ -4,6 +4,8 @@ import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.utils.Result
 
 interface MoviesRepository {
-    suspend fun getMovieById(id: Int, isOnline: Boolean): Result<List<Movie>>
-    suspend fun searchMovies(query: String?, isOnline: Boolean): Result<List<Movie>>
+    fun getMovieById(id: Int): Result<Movie>
+    fun searchMovies(query: String): Result<List<Movie>>
+    fun insertMovies(movieList: List<Movie>)
+    fun insertMovie(movie: Movie)
 }

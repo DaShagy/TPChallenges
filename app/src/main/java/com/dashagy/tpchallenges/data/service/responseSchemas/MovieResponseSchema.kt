@@ -1,7 +1,5 @@
 package com.dashagy.tpchallenges.data.service.responseSchemas
 
-import com.dashagy.tpchallenges.data.database.entities.RoomMovie
-import com.dashagy.tpchallenges.domain.entities.Movie
 import com.google.gson.annotations.SerializedName
 
 data class MovieResponseSchema(
@@ -9,8 +7,4 @@ data class MovieResponseSchema(
     val title: String,
     val overview: String,
     @SerializedName("poster_path") val poster: String?
-) {
-    //TODO use mappers
-    fun toMovie(): Movie = Movie(id, title, overview, poster)
-    fun toDatabaseMovie(): RoomMovie = RoomMovie(id, title, overview, poster)
-}
+)

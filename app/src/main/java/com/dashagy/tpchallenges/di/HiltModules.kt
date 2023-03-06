@@ -2,9 +2,11 @@ package com.dashagy.tpchallenges.di
 
 import android.content.Context
 import com.dashagy.tpchallenges.data.database.TPChallengesDatabase
-import com.dashagy.tpchallenges.data.repository.MoviesRepositoryImpl
+import com.dashagy.tpchallenges.data.database.MoviesRepositoryImpl
+import com.dashagy.tpchallenges.data.service.MoviesServiceImpl
 import com.dashagy.tpchallenges.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.tpchallenges.domain.repository.MoviesRepository
+import com.dashagy.tpchallenges.domain.service.MoviesService
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Constants
@@ -53,6 +55,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindMoviesRepository(moviesRepository: MoviesRepositoryImpl): MoviesRepository
+
+    @Binds
+    abstract fun bindMoviesService(movieService: MoviesServiceImpl): MoviesService
 }
 
 @Module
@@ -61,9 +66,9 @@ object UseCasesModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGetMovieByIdUseCase(repository: MoviesRepository) = GetMovieByIdUseCase(repository)
+    fun provideGetMovieByIdUseCase(repository: MoviesRepository, moviesService: MoviesService) = GetMovieByIdUseCase(repository, moviesService)
 
     @Provides
     @ViewModelScoped
-    fun provideSearchMovieUseCase(repository: MoviesRepository) = SearchMoviesUseCase(repository)
+    fun provideSearchMovieUseCase(repository: MoviesRepository, moviesService: MoviesService) = SearchMoviesUseCase(repository, moviesService)
 }
