@@ -7,4 +7,4 @@ fun RoomMovie.toMovie(): Movie = Movie(id, title.orEmpty(), overview.orEmpty(), 
 
 fun Movie.toRoomMovie(): RoomMovie = RoomMovie(id, title, overview, poster)
 
-fun List<RoomMovie>.toListOfMovies(): List<Movie> = this.map { it.toMovie() }
+fun List<RoomMovie>.toMovieList(): List<Movie> = this.map { it.toMovie() }

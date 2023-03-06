@@ -1,4 +1,4 @@
-package com.dashagy.tpchallenges.useCases
+package com.dashagy.tpchallenges.domain.useCases
 
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.repository.MoviesRepository

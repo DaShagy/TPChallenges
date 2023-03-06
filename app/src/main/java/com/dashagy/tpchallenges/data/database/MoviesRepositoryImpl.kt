@@ -1,7 +1,7 @@
 package com.dashagy.tpchallenges.data.database
 
 import com.dashagy.tpchallenges.data.database.daos.MovieDao
-import com.dashagy.tpchallenges.data.database.mappers.toListOfMovies
+import com.dashagy.tpchallenges.data.database.mappers.toMovieList
 import com.dashagy.tpchallenges.data.database.mappers.toMovie
 import com.dashagy.tpchallenges.data.database.mappers.toRoomMovie
 import com.dashagy.tpchallenges.domain.entities.Movie
@@ -25,7 +25,7 @@ class MoviesRepositoryImpl @Inject constructor(
     override fun searchMovies(query: String): Result<List<Movie>> =
         movieDao.searchMovieByName(query).let {
             if (it.isNotEmpty()) {
-                Result.Success(it.toListOfMovies())
+                Result.Success(it.toMovieList())
             } else {
                 Result.Error(Exception(DB_MOVIE_NOT_FOUND))
             }
