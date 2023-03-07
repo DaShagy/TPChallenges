@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
@@ -24,27 +25,24 @@ class MoviesViewModel @Inject constructor(
     val movieState: LiveData<MovieState>
         get() = _movieState
 
-    fun getMovieById(id: Int) = viewModelScope.launch {
-        _movieState.value = MovieState.Loading
-
-        withContext(Dispatchers.IO) { getMovieByIdUseCase(id) }.let { result ->
+    fun getMovieById(id: Int) = viewModelScope.launch(Dispatchers.IO) {
+        _movieState.postValue(MovieState.Loading)
+        getMovieByIdUseCase(id).let { result ->
             when (result) {
-                is Result.Success -> _movieState.value = MovieState.Success(listOf(result.data))
-                is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+                is Result.Success -> _movieState.postValue(MovieState.Success(listOf(result.data)))
+                is Result.Error -> _movieState.postValue(MovieState.Error(result.exception))
             }
         }
     }
 
 
-    fun searchMovie(query: String) = viewModelScope.launch {
-        _movieState.value = MovieState.Loading
-
-        withContext(Dispatchers.IO) { searchMoviesUseCase(query) }.let { result ->
+    fun searchMovie(query: String) = viewModelScope.launch(Dispatchers.IO) {
+        _movieState.postValue(MovieState.Loading)
+        searchMoviesUseCase(query).let { result ->
             when (result) {
-                is Result.Success -> _movieState.value = MovieState.Success(result.data)
-                is Result.Error -> _movieState.value = MovieState.Error(result.exception)
+                is Result.Success -> _movieState.postValue(MovieState.Success(result.data))
+                is Result.Error -> _movieState.postValue(MovieState.Error(result.exception))
             }
-
         }
     }
 

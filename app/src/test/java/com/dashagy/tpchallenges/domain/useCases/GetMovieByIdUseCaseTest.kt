@@ -24,6 +24,7 @@ class GetMovieByIdUseCaseTest {
     private lateinit var moviesService: MoviesService
 
     private var movie: Movie = Movie(ID, TITLE, OVERVIEW, POSTER)
+    private var exception: Exception = Exception(MSG)
 
     @Before
     fun init() {
@@ -48,7 +49,7 @@ class GetMovieByIdUseCaseTest {
     @Test
     fun `get movie by id use case from database returns success`() {
         every { moviesRepository.getMovieById(ID) } returns Result.Success(movie)
-        every { moviesService.getMovieById(ID) } returns Result.Error(Exception(MSG))
+        every { moviesService.getMovieById(ID) } returns Result.Error(exception)
 
         val result = getMovieByIdUseCase(movie.id)
 
@@ -59,8 +60,8 @@ class GetMovieByIdUseCaseTest {
 
     @Test
     fun `get movie by id use case from database returns error`() {
-        every { moviesRepository.getMovieById(ID) } returns Result.Error(Exception(MSG))
-        every { moviesService.getMovieById(ID) } returns Result.Error(Exception(MSG))
+        every { moviesRepository.getMovieById(ID) } returns Result.Error(exception)
+        every { moviesService.getMovieById(ID) } returns Result.Error(exception)
 
         val result = getMovieByIdUseCase(movie.id)
 

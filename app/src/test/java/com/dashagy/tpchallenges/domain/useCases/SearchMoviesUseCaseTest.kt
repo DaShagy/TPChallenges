@@ -24,6 +24,7 @@ class SearchMoviesUseCaseTest {
     private lateinit var moviesService: MoviesService
 
     private var movie: Movie = Movie(ID, TITLE, OVERVIEW, POSTER)
+    private var exception: Exception = Exception(MSG)
 
     @MockK
     private lateinit var movieList: List<Movie>
@@ -51,7 +52,7 @@ class SearchMoviesUseCaseTest {
     @Test
     fun `search movies use case from database returns success`() {
         every { moviesRepository.searchMovies(QUERY) } returns Result.Success(movieList)
-        every { moviesService.searchMovies(QUERY) } returns Result.Error(Exception(MSG))
+        every { moviesService.searchMovies(QUERY) } returns Result.Error(exception)
 
         val result = searchMoviesUseCase(QUERY)
 
@@ -62,8 +63,8 @@ class SearchMoviesUseCaseTest {
 
     @Test
     fun `search movies use case from database returns error`() {
-        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(Exception(MSG))
-        every { moviesService.searchMovies(QUERY) } returns Result.Error(Exception(MSG))
+        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(exception)
+        every { moviesService.searchMovies(QUERY) } returns Result.Error(exception)
 
         val result = searchMoviesUseCase(QUERY)
 
@@ -74,7 +75,7 @@ class SearchMoviesUseCaseTest {
 
     @Test
     fun `search movies use case should get movie by id from database if database search returns error - success`(){
-        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(Exception(MSG))
+        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(exception)
         every { moviesService.searchMovies(QUERY) } returns Result.Success(movieList)
 
         every { movieList.first() } returns movie
@@ -92,12 +93,12 @@ class SearchMoviesUseCaseTest {
 
     @Test
     fun `search movies use case should get movie by id from database if database search returns error - error`(){
-        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(Exception(MSG))
+        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(exception)
         every { moviesService.searchMovies(QUERY) } returns Result.Success(movieList)
 
         every { movieList.first() } returns movie
         every { movieList.isEmpty() } returns false
-        every { moviesRepository.getMovieById(movie.id) } returns Result.Error(Exception(MSG))
+        every { moviesRepository.getMovieById(movie.id) } returns Result.Error(exception)
 
         val result = searchMoviesUseCase(QUERY)
 
