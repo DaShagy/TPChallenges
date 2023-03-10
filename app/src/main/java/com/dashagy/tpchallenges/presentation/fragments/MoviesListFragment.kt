@@ -34,13 +34,13 @@ class MoviesListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMoviesListBinding.inflate(layoutInflater, container, false)
+        _binding = FragmentMoviesListBinding.inflate(inflater, container, false)
 
         movieListAdapter = MovieListAdapter().apply {
             setListener(
                 object : MovieListAdapter.OnItemClickListener {
                     override fun onItemClick(movie: Movie) {
-                        (activity as MainActivity).setFragment(MovieDetailsFragment.newInstance(movie))
+                        (activity as MainActivity).replaceFragment(MovieDetailsFragment.newInstance(movie))
                     }
                 }
             )
@@ -53,7 +53,7 @@ class MoviesListFragment : Fragment() {
 
         moviesViewModel.movieState.observe(viewLifecycleOwner, ::updateUI)
 
-        getMovieById(111)
+        //getMovieById(111)
 
         binding.svMovie.apply {
             setOnQueryTextListener(

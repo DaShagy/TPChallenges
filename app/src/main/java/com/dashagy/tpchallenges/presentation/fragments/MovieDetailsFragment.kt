@@ -19,9 +19,9 @@ class MovieDetailsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMovieDetailsBinding.inflate(layoutInflater, container, false)
+        _binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
 
-        val movie =
+        @Suppress("DEPRECATION") val movie =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arguments?.getParcelable(MOVIE_KEY, Movie::class.java)
             else arguments?.getParcelable(MOVIE_KEY) as? Movie
 

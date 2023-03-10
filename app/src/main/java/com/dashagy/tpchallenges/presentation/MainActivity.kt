@@ -20,19 +20,35 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
-        setFragment(MoviesListFragment.newInstance())
+        addFragment(MoviesListFragment.newInstance())
         setContentView(binding.root)
     }
 
-    fun setFragment(fragment: Fragment) {
+    fun replaceFragment(fragment: Fragment) {
         with (supportFragmentManager) {
-            beginTransaction().replace(binding.fragmentCvMain.id, fragment).commit()
+            beginTransaction().replace(binding.fragmentCvMain.id, fragment).addToBackStack(null).commit()
         }
     }
+
+    private fun addFragment(fragment: Fragment) {
+        with (supportFragmentManager) {
+            beginTransaction().add(binding.fragmentCvMain.id, fragment).addToBackStack(null).commit()
+        }
+    }
+
 
     fun hideKeyboard() {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).apply {
             hideSoftInputFromWindow(binding.root.windowToken, 0)
+        }
+    }
+
+    override fun onBackPressed() {
+        with (supportFragmentManager) {
+            when (fragments.last()) {
+                is MovieDetailsFragment -> popBackStack()
+                else -> super.onBackPressed()
+            }
         }
     }
 
