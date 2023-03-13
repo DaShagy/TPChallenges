@@ -53,8 +53,6 @@ class MoviesListFragment : Fragment() {
 
         moviesViewModel.movieState.observe(viewLifecycleOwner, ::updateUI)
 
-        //getMovieById(111)
-
         binding.svMovie.apply {
             setOnQueryTextListener(
                 object : SearchView.OnQueryTextListener {
@@ -71,6 +69,10 @@ class MoviesListFragment : Fragment() {
                 })
         }
 
+        binding.btnGetPopularMovies.apply {
+            setOnClickListener { getPopularMovies() }
+        }
+
         return binding.root
     }
 
@@ -80,6 +82,10 @@ class MoviesListFragment : Fragment() {
 
     private fun getMovieById(id: Int) = CoroutineScope(Dispatchers.Main).launch {
         moviesViewModel.getMovieById(id)
+    }
+
+    private fun getPopularMovies() = CoroutineScope(Dispatchers.IO).launch {
+        moviesViewModel.getPopularMovies()
     }
 
     private fun updateUI(state: MoviesViewModel.MovieState) {

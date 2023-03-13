@@ -10,9 +10,12 @@ import retrofit2.http.Query
 
 interface TheMovieDatabaseAPI {
 
-     @GET("movie/{movieId}?api_key=${Constants.API_KEY}")
-     fun getMovieById(@Path("movieId") movieId: Int): Call<MovieResponseSchema>
+    @GET("movie/{movieId}?api_key=${Constants.API_KEY}")
+    fun getMovieById(@Path("movieId") movieId: Int): Call<MovieResponseSchema>
 
-     @GET("search/movie?api_key=${Constants.API_KEY}")
-     fun searchMovieByName(@Query("query") query: String): Call<MovieListResponseSchema>
+    @GET("search/movie?api_key=${Constants.API_KEY}")
+    fun searchMovieByName(@Query("query") query: String): Call<MovieListResponseSchema>
+
+    @GET("movie/popular?api_key=${Constants.API_KEY}")
+    fun getPopularMovies(): Call<MovieListResponseSchema>
 }

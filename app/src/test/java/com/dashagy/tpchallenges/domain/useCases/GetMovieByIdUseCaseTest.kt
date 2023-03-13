@@ -3,7 +3,6 @@ package com.dashagy.tpchallenges.domain.useCases
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.repository.MoviesRepository
 import com.dashagy.tpchallenges.domain.service.MoviesService
-import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.tpchallenges.utils.Result
 import io.mockk.MockKAnnotations
 import io.mockk.every

@@ -16,4 +16,7 @@ interface MovieDao {
 
     @Query("SELECT * FROM Movies WHERE id = :id")
     fun getMovieById(id: Int): List<RoomMovie>
+
+    @Query("SELECT * FROM Movies")
+    fun getPopularMovies(): List<RoomMovie>
 }

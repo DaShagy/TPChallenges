@@ -36,6 +36,20 @@ class MoviesServiceImpl @Inject constructor(private val api: TheMovieDatabaseAPI
         return Result.Error(Exception(SERVICE_MOVIE_NOT_FOUND))
     }
 
+    override fun getPopularMovies(): Result<List<Movie>> {
+        try {
+            val callResponse = api.getPopularMovies()
+            val response = callResponse.execute()
+            if (response.isSuccessful) response.body()?.let { movieSchemaList ->
+                return if (movieSchemaList.movies.isNotEmpty()) Result.Success(movieSchemaList.toMovieList())
+                else Result.Error(Exception(SERVICE_MOVIE_NOT_FOUND))
+            }
+        } catch (e: Exception) {
+            return Result.Error(e)
+        }
+        return Result.Error(Exception(SERVICE_MOVIE_NOT_FOUND))
+    }
+
     companion object {
         const val SERVICE_MOVIE_NOT_FOUND = "Movie not found"
     }

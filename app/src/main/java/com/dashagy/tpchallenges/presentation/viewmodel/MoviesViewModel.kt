@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
+import com.dashagy.tpchallenges.domain.useCases.GetPopularMoviesUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val getMovieByIdUseCase: GetMovieByIdUseCase,
-    private val searchMoviesUseCase: SearchMoviesUseCase
+    private val searchMoviesUseCase: SearchMoviesUseCase,
+    private val getPopularMoviesUseCase: GetPopularMoviesUseCase
 ): ViewModel() {
 
     private var _movieState: MutableLiveData<MovieState> = MutableLiveData()
@@ -37,6 +39,16 @@ class MoviesViewModel @Inject constructor(
     fun searchMovie(query: String) = viewModelScope.launch(Dispatchers.IO) {
         _movieState.postValue(MovieState.Loading)
         searchMoviesUseCase(query).let { result ->
+            when (result) {
+                is Result.Success -> _movieState.postValue(MovieState.Success(result.data))
+                is Result.Error -> _movieState.postValue(MovieState.Error(result.exception))
+            }
+        }
+    }
+
+    fun getPopularMovies() = viewModelScope.launch(Dispatchers.IO) {
+        _movieState.postValue(MovieState.Loading)
+        getPopularMoviesUseCase().let { result ->
             when (result) {
                 is Result.Success -> _movieState.postValue(MovieState.Success(result.data))
                 is Result.Error -> _movieState.postValue(MovieState.Error(result.exception))

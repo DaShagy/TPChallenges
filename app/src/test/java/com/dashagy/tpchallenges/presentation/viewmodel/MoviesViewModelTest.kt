@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
+import com.dashagy.tpchallenges.domain.useCases.GetPopularMoviesUseCase
 import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
 import com.dashagy.tpchallenges.utils.Result
 import io.mockk.*
@@ -37,6 +38,9 @@ class MoviesViewModelTest {
     private lateinit var searchMoviesUseCase: SearchMoviesUseCase
 
     @MockK
+    private lateinit var getPopularMoviesUseCase: GetPopularMoviesUseCase
+
+    @MockK
     private lateinit var dataObserver: Observer<MoviesViewModel.MovieState>
 
     private var movie: Movie = Movie(ID, TITLE, OVERVIEW, POSTER)
@@ -49,7 +53,11 @@ class MoviesViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         MockKAnnotations.init(this, relaxUnitFun = true)
 
-        viewModel = MoviesViewModel(getMovieByIdUseCase, searchMoviesUseCase)
+        viewModel = MoviesViewModel(
+            getMovieByIdUseCase,
+            searchMoviesUseCase,
+            getPopularMoviesUseCase
+        )
 
         viewModel.movieState.observeForever(dataObserver)
     }
@@ -130,6 +138,48 @@ class MoviesViewModelTest {
             coEvery { searchMoviesUseCase(QUERY) } returns Result.Error(exception)
 
             viewModel.searchMovie(QUERY)
+
+            val argumentCaptor: MutableList<MoviesViewModel.MovieState> = mutableListOf()
+
+            delay(5000)
+            verify { dataObserver.onChanged(capture(argumentCaptor)) }
+
+            with(argumentCaptor){
+                assert(this[0] is MoviesViewModel.MovieState.Loading)
+                assert(this[1] is MoviesViewModel.MovieState.Error)
+
+                assertEquals(MSG, (this[1] as MoviesViewModel.MovieState.Error).exception.message)
+            }
+        }
+    }
+
+    @Test
+    fun `if get popular movies use case returns success`() {
+        runTest(UnconfinedTestDispatcher()){
+            coEvery { getPopularMoviesUseCase() } returns Result.Success(listOf(movie))
+
+            viewModel.getPopularMovies()
+
+            val argumentCaptor: MutableList<MoviesViewModel.MovieState> = mutableListOf()
+
+            delay(5000)
+            verify { dataObserver.onChanged(capture(argumentCaptor)) }
+
+            with(argumentCaptor){
+                assert(this[0] is MoviesViewModel.MovieState.Loading)
+                assert(this[1] is MoviesViewModel.MovieState.Success)
+
+                assertEquals(movie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
+            }
+        }
+    }
+
+    @Test
+    fun `if get popular movies use case returns error`() {
+        runTest(UnconfinedTestDispatcher()){
+            coEvery { getPopularMoviesUseCase() } returns Result.Error(exception)
+
+            viewModel.getPopularMovies()
 
             val argumentCaptor: MutableList<MoviesViewModel.MovieState> = mutableListOf()
 

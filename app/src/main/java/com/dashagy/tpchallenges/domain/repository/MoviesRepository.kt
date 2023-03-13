@@ -8,4 +8,5 @@ interface MoviesRepository {
     fun searchMovies(query: String): Result<List<Movie>>
     fun insertMovies(movieList: List<Movie>)
     fun insertMovie(movie: Movie)
+    fun getPopularMovies(): Result<List<Movie>>
 }

@@ -8,12 +8,23 @@
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/sv_movie"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
+        android:inputType="text"
         tools:text="Name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_get_popular_movies">
+    </androidx.appcompat.widget.SearchView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_get_popular_movies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Popular" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_movies"
