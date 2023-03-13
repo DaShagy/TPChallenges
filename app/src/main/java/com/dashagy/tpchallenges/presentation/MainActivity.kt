@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addFragment(fragment: Fragment) {
         with (supportFragmentManager) {
-            beginTransaction().add(binding.fragmentCvMain.id, fragment).addToBackStack(null).commit()
+            beginTransaction().add(binding.fragmentCvMain.id, fragment).commit()
         }
     }
 
