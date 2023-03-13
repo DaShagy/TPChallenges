@@ -7,6 +7,7 @@ import com.dashagy.tpchallenges.data.database.mappers.toRoomMovie
 import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.domain.repository.MoviesRepository
 import com.dashagy.tpchallenges.utils.Result
+import com.dashagy.tpchallenges.utils.TimeUtil
 import javax.inject.Inject
 
 class MoviesRepositoryImpl @Inject constructor(
@@ -22,8 +23,8 @@ class MoviesRepositoryImpl @Inject constructor(
             }
         }
 
-    override fun searchMovies(query: String): Result<List<Movie>> =
-        movieDao.searchMovieByName(query).let {
+    override fun getLastUpdatedMovies(): Result<List<Movie>> =
+        movieDao.getLastUpdatedMovies().let {
             if (it.isNotEmpty()) {
                 Result.Success(it.toMovieList())
             } else {
@@ -40,16 +41,6 @@ class MoviesRepositoryImpl @Inject constructor(
     override fun insertMovie(movie: Movie) {
         movieDao.insertMovie(movie.toRoomMovie())
     }
-
-    override fun getPopularMovies(): Result<List<Movie>> =
-        movieDao.getPopularMovies().let {
-            if (it.isNotEmpty()) {
-                Result.Success(it.toMovieList())
-            } else {
-                Result.Error(Exception(DB_MOVIE_NOT_FOUND))
-            }
-        }
-
 
     companion object {
         const val DB_MOVIE_NOT_FOUND = "Movie not found"

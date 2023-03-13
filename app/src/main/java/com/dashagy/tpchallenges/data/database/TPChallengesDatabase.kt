@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.dashagy.tpchallenges.data.database.daos.MovieDao
 import com.dashagy.tpchallenges.data.database.entities.RoomMovie
 
-@Database(entities = [RoomMovie::class], version = 1)
+@Database(entities = [RoomMovie::class], version = 2)
 abstract class TPChallengesDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 

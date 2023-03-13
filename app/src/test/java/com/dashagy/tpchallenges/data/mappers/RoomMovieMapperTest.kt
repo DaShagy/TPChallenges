@@ -5,6 +5,7 @@ import com.dashagy.tpchallenges.data.database.mappers.toMovie
 import com.dashagy.tpchallenges.data.database.mappers.toMovieList
 import com.dashagy.tpchallenges.data.database.mappers.toRoomMovie
 import com.dashagy.tpchallenges.domain.entities.Movie
+import com.dashagy.tpchallenges.utils.TimeUtil
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -18,7 +19,7 @@ class RoomMovieMapperTest {
     @Before
     fun init() {
         domainMovie = Movie(ID_1, TITLE_1, OVERVIEW_1, POSTER_1)
-        roomMovie = RoomMovie(ID_2, TITLE_2, OVERVIEW_2, null)
+        roomMovie = RoomMovie(ID_2, TITLE_2, OVERVIEW_2, null, TimeUtil.getTimestamp())
 
         roomMovieList = listOf(roomMovie)
     }

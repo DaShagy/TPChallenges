@@ -37,7 +37,7 @@ class GetPopularMoviesUseCaseTest {
 
     @Test
     fun `get popular movies use case from service returns success`() {
-        every { moviesRepository.getPopularMovies() } returns Result.Success(movieList)
+        every { moviesRepository.getLastUpdatedMovies() } returns Result.Success(movieList)
         every { moviesService.getPopularMovies() } returns Result.Success(movieList)
 
         every { movieList.first() } returns movie
@@ -46,7 +46,7 @@ class GetPopularMoviesUseCaseTest {
         val result = getPopularMoviesUseCase()
 
         verify { moviesRepository.insertMovies(movieList) }
-        verify { moviesRepository.getPopularMovies() }
+        verify { moviesRepository.getLastUpdatedMovies() }
 
         Assert.assertEquals(movieList, (result as Result.Success).data)
         Assert.assertEquals(movie, result.data.first())
@@ -54,7 +54,7 @@ class GetPopularMoviesUseCaseTest {
 
     @Test
     fun `get popular movies use case from database returns success`() {
-        every { moviesRepository.getPopularMovies() } returns Result.Success(movieList)
+        every { moviesRepository.getLastUpdatedMovies() } returns Result.Success(movieList)
         every { moviesService.getPopularMovies() } returns Result.Error(exception)
 
         every { movieList.first() } returns movie
@@ -62,7 +62,7 @@ class GetPopularMoviesUseCaseTest {
 
         val result = getPopularMoviesUseCase()
 
-        verify { moviesRepository.getPopularMovies() }
+        verify { moviesRepository.getLastUpdatedMovies() }
 
         Assert.assertEquals(movieList, (result as Result.Success).data)
         Assert.assertEquals(movie, result.data.first())
@@ -70,12 +70,12 @@ class GetPopularMoviesUseCaseTest {
 
     @Test
     fun `get popular movies use case from database returns error`() {
-        every { moviesRepository.getPopularMovies() } returns Result.Error(exception)
+        every { moviesRepository.getLastUpdatedMovies() } returns Result.Error(exception)
         every { moviesService.getPopularMovies() } returns Result.Error(exception)
 
         val result = getPopularMoviesUseCase()
 
-        verify { moviesRepository.getPopularMovies() }
+        verify { moviesRepository.getLastUpdatedMovies() }
 
         Assert.assertEquals(MSG, (result as Result.Error).exception.message)
     }

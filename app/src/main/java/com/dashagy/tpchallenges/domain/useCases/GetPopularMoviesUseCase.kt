@@ -14,9 +14,9 @@ class GetPopularMoviesUseCase @Inject constructor(
         return when (val serviceResult = service.getPopularMovies()) {
             is Result.Success -> {
                 repository.insertMovies(serviceResult.data)
-                repository.getPopularMovies()
+                repository.getLastUpdatedMovies()
             }
-            is Result.Error -> repository.getPopularMovies()
+            is Result.Error -> repository.getLastUpdatedMovies()
         }
     }
 }

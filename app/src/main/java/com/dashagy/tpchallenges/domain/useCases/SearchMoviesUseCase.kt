@@ -14,7 +14,7 @@ class SearchMoviesUseCase @Inject constructor(
         return when (val serviceResponse = service.searchMovies(query)) {
             is Result.Success -> {
                 repository.insertMovies(serviceResponse.data)
-                when (val movieListFromDatabase = repository.searchMovies(query)) {
+                when (val movieListFromDatabase = repository.getLastUpdatedMovies()) {
                     is Result.Success -> movieListFromDatabase
                     is Result.Error -> when (val movieFromDatabase = repository.getMovieById(serviceResponse.data.first().id)){
                         is Result.Success -> Result.Success(listOf(movieFromDatabase.data))
@@ -22,7 +22,7 @@ class SearchMoviesUseCase @Inject constructor(
                     }
                 }
             }
-            is Result.Error -> repository.searchMovies(query)
+            is Result.Error -> repository.getLastUpdatedMovies()
         }
     }
 }
