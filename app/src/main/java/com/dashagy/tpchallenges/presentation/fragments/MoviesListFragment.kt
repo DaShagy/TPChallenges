@@ -76,17 +76,11 @@ class MoviesListFragment : Fragment() {
         return binding.root
     }
 
-    private fun searchMovie(query: String) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.searchMovie(query)
-    }
+    private fun searchMovie(query: String) = moviesViewModel.searchMovie(query)
 
-    private fun getMovieById(id: Int) = CoroutineScope(Dispatchers.Main).launch {
-        moviesViewModel.getMovieById(id)
-    }
+    private fun getMovieById(id: Int) = moviesViewModel.getMovieById(id)
 
-    private fun getPopularMovies() = CoroutineScope(Dispatchers.IO).launch {
-        moviesViewModel.getPopularMovies()
-    }
+    private fun getPopularMovies() = moviesViewModel.getPopularMovies()
 
     private fun updateUI(state: MoviesViewModel.MovieState) {
         when (state) {
