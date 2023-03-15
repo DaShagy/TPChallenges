@@ -1,4 +1,4 @@
-package com.dashagy.tpchallenges.presentation.viewmodel
+package com.dashagy.tpchallenges.presentation.viewmodel.movies
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
@@ -7,7 +7,6 @@ import com.dashagy.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.domain.useCases.GetPopularMoviesUseCase
 import com.dashagy.domain.useCases.SearchMoviesUseCase
 import com.dashagy.domain.utils.Result
-import com.dashagy.tpchallenges.presentation.viewmodel.movies.MoviesViewModel
 import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
