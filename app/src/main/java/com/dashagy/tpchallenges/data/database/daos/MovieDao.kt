@@ -16,4 +16,7 @@ interface MovieDao {
 
     @Query("SELECT * FROM Movies ORDER BY created_at DESC LIMIT 20")
     fun getLastUpdatedMovies(): List<RoomMovie>
+
+    @Query("SELECT * FROM Movies WHERE title LIKE '%' || :query || '%' ORDER BY created_at DESC LIMIT 2")
+    fun searchMovieByName(query: String): List<RoomMovie>
 }

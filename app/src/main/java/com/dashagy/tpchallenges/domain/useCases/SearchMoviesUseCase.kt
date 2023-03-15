@@ -22,7 +22,7 @@ class SearchMoviesUseCase @Inject constructor(
                     }
                 }
             }
-            is Result.Error -> repository.getLastUpdatedMovies()
+            is Result.Error -> repository.searchMovies(query)
         }
     }
 }

@@ -51,24 +51,24 @@ class SearchMoviesUseCaseTest {
 
     @Test
     fun `search movies use case from database returns success`() {
-        every { moviesRepository.getLastUpdatedMovies() } returns Result.Success(movieList)
+        every { moviesRepository.searchMovies(QUERY) } returns Result.Success(movieList)
         every { moviesService.searchMovies(QUERY) } returns Result.Error(exception)
 
         val result = searchMoviesUseCase(QUERY)
 
-        verify { moviesRepository.getLastUpdatedMovies() }
+        verify { moviesRepository.searchMovies(QUERY) }
 
         Assert.assertEquals(movieList, (result as Result.Success).data)
     }
 
     @Test
     fun `search movies use case from database returns error`() {
-        every { moviesRepository.getLastUpdatedMovies() } returns Result.Error(exception)
+        every { moviesRepository.searchMovies(QUERY) } returns Result.Error(exception)
         every { moviesService.searchMovies(QUERY) } returns Result.Error(exception)
 
         val result = searchMoviesUseCase(QUERY)
 
-        verify { moviesRepository.getLastUpdatedMovies() }
+        verify { moviesRepository.searchMovies(QUERY) }
 
         Assert.assertEquals(MSG, (result as Result.Error).exception.message)
     }

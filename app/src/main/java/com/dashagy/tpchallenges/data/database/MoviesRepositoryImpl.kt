@@ -42,6 +42,15 @@ class MoviesRepositoryImpl @Inject constructor(
         movieDao.insertMovie(movie.toRoomMovie())
     }
 
+    override fun searchMovies(query: String): Result<List<Movie>> =
+        movieDao.searchMovieByName(query).let {
+            if (it.isNotEmpty()) {
+                Result.Success(it.toMovieList())
+            } else {
+                Result.Error(Exception(DB_MOVIE_NOT_FOUND))
+            }
+        }
+
     companion object {
         const val DB_MOVIE_NOT_FOUND = "Movie not found"
     }
