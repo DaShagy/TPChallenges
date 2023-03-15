@@ -5,19 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.dashagy.tpchallenges.databinding.RecyclerviewMovieItemBinding
-import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.presentation.utils.loadImage
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 
 class MovieListAdapter: RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>() {
 
-    private var dataset: List<Movie> = listOf()
+    private var dataset: List<ViewModelMovie> = listOf()
     private var listener: OnItemClickListener? = null
 
     interface OnItemClickListener {
-        fun onItemClick(movie: Movie)
+        fun onItemClick(movie: ViewModelMovie)
     }
 
-    fun updateDataset(movieList: List<Movie>){
+    fun updateDataset(movieList: List<ViewModelMovie>){
         val oldMovieList = dataset
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(
             MovieListsDiffCallback(oldMovieList, movieList)
@@ -45,7 +45,7 @@ class MovieListAdapter: RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>()
         private val binding: RecyclerviewMovieItemBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(movie: Movie, listener: OnItemClickListener?) {
+        fun bind(movie: ViewModelMovie, listener: OnItemClickListener?) {
             with(binding) {
                 ivMovieItemPoster.loadImage(
                     ivMovieItemPoster.context,
@@ -61,8 +61,8 @@ class MovieListAdapter: RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>()
     }
 
     private class MovieListsDiffCallback(
-        val oldList: List<Movie>,
-        val newList: List<Movie>
+        val oldList: List<ViewModelMovie>,
+        val newList: List<ViewModelMovie>
     ) : DiffUtil.Callback(){
 
         override fun getOldListSize(): Int = oldList.size

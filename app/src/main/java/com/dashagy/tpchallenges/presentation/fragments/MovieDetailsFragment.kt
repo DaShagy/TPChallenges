@@ -7,8 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dashagy.tpchallenges.databinding.FragmentMovieDetailsBinding
-import com.dashagy.tpchallenges.domain.entities.Movie
+import com.dashagy.domain.entities.Movie
 import com.dashagy.tpchallenges.presentation.utils.loadImage
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 
 class MovieDetailsFragment : Fragment() {
 
@@ -22,8 +23,8 @@ class MovieDetailsFragment : Fragment() {
         _binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
 
         @Suppress("DEPRECATION") val movie =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arguments?.getParcelable(MOVIE_KEY, Movie::class.java)
-            else arguments?.getParcelable(MOVIE_KEY) as? Movie
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arguments?.getParcelable(MOVIE_KEY, ViewModelMovie::class.java)
+            else arguments?.getParcelable(MOVIE_KEY) as? ViewModelMovie
 
         movie?.let {
             binding.apply {
@@ -40,7 +41,7 @@ class MovieDetailsFragment : Fragment() {
         private const val MOVIE_KEY = "movie_id"
 
         @JvmStatic
-        fun newInstance(movie: Movie) = MovieDetailsFragment().apply {
+        fun newInstance(movie: ViewModelMovie) = MovieDetailsFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(MOVIE_KEY, movie)
             }

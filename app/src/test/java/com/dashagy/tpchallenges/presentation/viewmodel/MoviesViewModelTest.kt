@@ -2,11 +2,13 @@ package com.dashagy.tpchallenges.presentation.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.dashagy.tpchallenges.domain.entities.Movie
-import com.dashagy.tpchallenges.domain.useCases.GetMovieByIdUseCase
-import com.dashagy.tpchallenges.domain.useCases.GetPopularMoviesUseCase
-import com.dashagy.tpchallenges.domain.useCases.SearchMoviesUseCase
-import com.dashagy.tpchallenges.utils.Result
+import com.dashagy.domain.entities.Movie
+import com.dashagy.domain.useCases.GetMovieByIdUseCase
+import com.dashagy.domain.useCases.GetPopularMoviesUseCase
+import com.dashagy.domain.useCases.SearchMoviesUseCase
+import com.dashagy.domain.utils.Result
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.MoviesViewModel
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +45,8 @@ class MoviesViewModelTest {
     @MockK
     private lateinit var dataObserver: Observer<MoviesViewModel.MovieState>
 
-    private var movie: Movie = Movie(ID, TITLE, OVERVIEW, POSTER)
+    private var movie: Movie = Movie(ID, TITLE, OVERVIEW, POSTER, TIMESTAMP)
+    private var viewModelMovie: ViewModelMovie = ViewModelMovie(ID, TITLE, OVERVIEW, POSTER, TIMESTAMP)
     private var exception: Exception = Exception(MSG)
 
     private lateinit var viewModel: MoviesViewModel
@@ -85,7 +88,7 @@ class MoviesViewModelTest {
                 assert(this[0] is MoviesViewModel.MovieState.Loading)
                 assert(this[1] is MoviesViewModel.MovieState.Success)
 
-                assertEquals(movie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
+                assertEquals(viewModelMovie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
             }
         }
     }
@@ -127,7 +130,7 @@ class MoviesViewModelTest {
                 assert(this[0] is MoviesViewModel.MovieState.Loading)
                 assert(this[1] is MoviesViewModel.MovieState.Success)
 
-                assertEquals(movie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
+                assertEquals(viewModelMovie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
             }
         }
     }
@@ -169,7 +172,7 @@ class MoviesViewModelTest {
                 assert(this[0] is MoviesViewModel.MovieState.Loading)
                 assert(this[1] is MoviesViewModel.MovieState.Success)
 
-                assertEquals(movie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
+                assertEquals(viewModelMovie, (this[1] as MoviesViewModel.MovieState.Success).movies[0])
             }
         }
     }
@@ -202,6 +205,7 @@ class MoviesViewModelTest {
         private const val TITLE = "Scarface"
         private const val OVERVIEW = "Overview of scarface"
         private const val POSTER = "Some URL"
+        private const val TIMESTAMP = 1000L
         private const val MSG = "ERROR"
     }
 }

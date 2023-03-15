@@ -10,15 +10,12 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.dashagy.tpchallenges.databinding.FragmentMoviesListBinding
-import com.dashagy.tpchallenges.domain.entities.Movie
 import com.dashagy.tpchallenges.presentation.MainActivity
 import com.dashagy.tpchallenges.presentation.adapters.MovieListAdapter
 import com.dashagy.tpchallenges.presentation.utils.clean
-import com.dashagy.tpchallenges.presentation.viewmodel.MoviesViewModel
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.MoviesViewModel
+import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MoviesListFragment : Fragment() {
@@ -39,7 +36,7 @@ class MoviesListFragment : Fragment() {
         movieListAdapter = MovieListAdapter().apply {
             setListener(
                 object : MovieListAdapter.OnItemClickListener {
-                    override fun onItemClick(movie: Movie) {
+                    override fun onItemClick(movie: ViewModelMovie) {
                         (activity as MainActivity).replaceFragment(MovieDetailsFragment.newInstance(movie))
                     }
                 }
