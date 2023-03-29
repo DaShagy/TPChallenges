@@ -10,7 +10,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.dashagy.tpchallenges.databinding.FragmentMoviesListBinding
-import com.dashagy.tpchallenges.presentation.MainActivity
+import com.dashagy.tpchallenges.presentation.activity.MainActivity
 import com.dashagy.tpchallenges.presentation.adapters.MovieListAdapter
 import com.dashagy.tpchallenges.presentation.utils.clean
 import com.dashagy.tpchallenges.presentation.viewmodel.movies.MoviesViewModel
