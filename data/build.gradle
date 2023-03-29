@@ -51,6 +51,9 @@ dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "io.mockk:mockk:${mockk_version}"
 
+    //Firebase storage
+    implementation 'com.google.firebase:firebase-storage-ktx:20.1.0'
+
     //For Inject annotations, I think this shouldn't be here
     implementation "javax.inject:javax.inject:1"
 

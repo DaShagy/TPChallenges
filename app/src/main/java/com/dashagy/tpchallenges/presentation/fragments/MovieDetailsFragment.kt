@@ -7,8 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dashagy.tpchallenges.databinding.FragmentMovieDetailsBinding
-import com.dashagy.domain.entities.Movie
-import com.dashagy.tpchallenges.presentation.utils.loadImage
+import com.dashagy.tpchallenges.presentation.utils.loadPosterImage
 import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 
 class MovieDetailsFragment : Fragment() {
@@ -30,7 +29,7 @@ class MovieDetailsFragment : Fragment() {
             binding.apply {
                 tvMovieTitle.text = it.title
                 tvMovieOverview.text = it.overview
-                ivMoviePoster.loadImage(requireContext(), it.poster)
+                ivMoviePoster.loadPosterImage(requireContext(), it.poster)
             }
         }
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "506440053316",
+    "project_id": "tpchallenges-eb448",
+    "storage_bucket": "tpchallenges-eb448.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506440053316:android:9da15ba99f70a4edf64211",
+        "android_client_info": {
+          "package_name": "com.dashagy.tpchallenges"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "506440053316-tj21fnr0e5r15t0vef34bpobpfs1natn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjD5Ky6_Q3KQK9mSmE_45aVOmvIYZzJwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "506440053316-tj21fnr0e5r15t0vef34bpobpfs1natn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

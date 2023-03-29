@@ -1,9 +1,11 @@
 package com.dashagy.di
 
 import com.dashagy.domain.repository.MoviesRepository
+import com.dashagy.domain.service.ImageService
 import com.dashagy.domain.service.MoviesService
 import com.dashagy.domain.useCases.GetMovieByIdUseCase
 import com.dashagy.domain.useCases.SearchMoviesUseCase
+import com.dashagy.domain.useCases.UploadImageToServiceUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +25,9 @@ object UseCasesModule {
     @ViewModelScoped
     fun provideSearchMovieUseCase(repository: MoviesRepository, moviesService: MoviesService) =
         SearchMoviesUseCase(repository, moviesService)
+
+    @Provides
+    @ViewModelScoped
+    fun provideUploadImageToServiceUseCase(imageService: ImageService) =
+        UploadImageToServiceUseCase(imageService)
 }

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.dashagy.tpchallenges.databinding.RecyclerviewMovieItemBinding
-import com.dashagy.tpchallenges.presentation.utils.loadImage
+import com.dashagy.tpchallenges.presentation.utils.loadPosterImage
 import com.dashagy.tpchallenges.presentation.viewmodel.movies.model.ViewModelMovie
 
 class MovieListAdapter: RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>() {
@@ -47,7 +47,7 @@ class MovieListAdapter: RecyclerView.Adapter<MovieListAdapter.MovieViewHolder>()
 
         fun bind(movie: ViewModelMovie, listener: OnItemClickListener?) {
             with(binding) {
-                ivMovieItemPoster.loadImage(
+                ivMovieItemPoster.loadPosterImage(
                     ivMovieItemPoster.context,
                     movie.poster
                 )
