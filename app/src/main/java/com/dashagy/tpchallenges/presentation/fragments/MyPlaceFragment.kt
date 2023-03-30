@@ -16,6 +16,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.dashagy.tpchallenges.databinding.FragmentMyPlaceBinding
+import com.dashagy.tpchallenges.presentation.activity.MyPlacesActivity
 import com.dashagy.tpchallenges.presentation.utils.loadImageFromUri
 import com.dashagy.tpchallenges.presentation.viewmodel.places.MyPlaceViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -112,16 +113,21 @@ class MyPlaceFragment : Fragment() {
     private fun updateImagePreview(state: MyPlaceViewModel.MyPlaceState) {
         when (state) {
             is MyPlaceViewModel.MyPlaceState.AddPictureError -> {
+                (activity as MyPlacesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
             is MyPlaceViewModel.MyPlaceState.AddPictureSuccess -> {
+                (activity as MyPlacesActivity).hideProgressBar()
                 binding.ivMyPlace.loadImageFromUri(requireActivity(), state.uri)
             }
-            MyPlaceViewModel.MyPlaceState.Loading -> Unit //TODO: Progressbar
+            MyPlaceViewModel.MyPlaceState.Loading -> {
+                (activity as MyPlacesActivity).showProgressBar()
+            }
             is MyPlaceViewModel.MyPlaceState.UploadError -> {
-                Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
+                (activity as MyPlacesActivity).hideProgressBar()
             }
             is MyPlaceViewModel.MyPlaceState.UploadSuccess -> {
+                (activity as MyPlacesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_LONG).show()
             }
         }
