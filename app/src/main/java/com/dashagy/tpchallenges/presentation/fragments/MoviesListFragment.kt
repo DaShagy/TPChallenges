@@ -66,9 +66,7 @@ class MoviesListFragment : Fragment() {
                 })
         }
 
-        binding.btnGetPopularMovies.apply {
-            setOnClickListener { getPopularMovies() }
-        }
+        binding.btnGetPopularMovies.setOnClickListener { getPopularMovies() }
 
         return binding.root
     }

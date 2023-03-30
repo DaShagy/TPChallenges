@@ -20,10 +20,17 @@ class ImageServiceImpl @Inject constructor (
 
         childRef
             .putFile(uri)
-            .addOnFailureListener {
-                callback(Result.Error(it))
-            }.addOnSuccessListener {
-                callback(Result.Success("UPLOAD IMAGE $imageUri into ${childRef.path}"))
+            .continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    callback(Result.Error(task.exception ?: Exception("Unknown Error")))
+                }
+                childRef.downloadUrl
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    callback(Result.Success(task.result.toString()))
+                } else {
+                    callback(Result.Error(task.exception ?: Exception("Unknown Error")))
+                }
             }
     }
 }

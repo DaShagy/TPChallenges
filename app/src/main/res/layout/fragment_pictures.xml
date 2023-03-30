@@ -4,35 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".presentation.fragments.MyPlaceFragment">
-    
-    <ImageView
-        android:id="@+id/iv_my_place"
-        android:layout_width="match_parent"
+    tools:context=".presentation.fragments.PicturesFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_pictures"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:contentDescription="Image to upload"
-        android:layout_margin="8dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:padding="8dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btn_add_my_place_image"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_add_pictures"/>
 
     <Button
-        android:id="@+id/btn_add_my_place_image"
+        android:id="@+id/btn_add_pictures"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ADD IMAGE"
+        android:text="ADD PICTURES"
         android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_upload_my_place_image"
+        app:layout_constraintBottom_toTopOf="@id/btn_upload_pictures"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
-        android:id="@+id/btn_upload_my_place_image"
+        android:id="@+id/btn_upload_pictures"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="UPLOAD IMAGE"
+        android:text="UPLOAD PICTURES"
         android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"

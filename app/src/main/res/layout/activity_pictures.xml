@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.activity.MyPlacesActivity">
+    tools:context=".presentation.activity.PicturesActivity">
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -17,7 +17,7 @@
         android:visibility="gone"/>
 
     <FrameLayout
-        android:id="@+id/fragment_cv_my_places"
+        android:id="@+id/fragment_cv_pictures"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"

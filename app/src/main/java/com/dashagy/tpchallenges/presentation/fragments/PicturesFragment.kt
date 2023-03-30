@@ -15,10 +15,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.dashagy.tpchallenges.databinding.FragmentMyPlaceBinding
-import com.dashagy.tpchallenges.presentation.activity.MyPlacesActivity
-import com.dashagy.tpchallenges.presentation.utils.loadImageFromUri
-import com.dashagy.tpchallenges.presentation.viewmodel.places.MyPlaceViewModel
+import androidx.recyclerview.widget.GridLayoutManager
+import com.dashagy.tpchallenges.databinding.FragmentPicturesBinding
+import com.dashagy.tpchallenges.presentation.activity.PicturesActivity
+import com.dashagy.tpchallenges.presentation.adapters.PictureListAdapter
+import com.dashagy.tpchallenges.presentation.viewmodel.pictures.PictureViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.IOException
@@ -26,16 +27,18 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
-class MyPlaceFragment : Fragment() {
+class PicturesFragment : Fragment() {
 
-    private val viewModel: MyPlaceViewModel by viewModels()
+    private val viewModel: PictureViewModel by viewModels()
 
-    private var _binding: FragmentMyPlaceBinding? = null
+    private var _binding: FragmentPicturesBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var pickVisualMediaLauncher: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var cameraRequestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
+
+    private lateinit var pictureListAdapter: PictureListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +52,17 @@ class MyPlaceFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMyPlaceBinding.inflate(inflater, container, false)
+        _binding = FragmentPicturesBinding.inflate(inflater, container, false)
 
-        binding.btnAddMyPlaceImage.setOnClickListener { onAddImageButtonPressed() }
-        binding.btnUploadMyPlaceImage.setOnClickListener { onUploadImageButtonPressed() }
+        pictureListAdapter = PictureListAdapter()
+
+        binding.rvPictures.apply {
+            adapter = pictureListAdapter
+            layoutManager = GridLayoutManager(requireActivity(), 3)
+        }
+
+        binding.btnAddPictures.setOnClickListener { onAddImageButtonPressed() }
+        binding.btnUploadPictures.setOnClickListener { onUploadImageButtonPressed() }
 
         viewModel.myPlaceState.observe(viewLifecycleOwner, ::updateImagePreview)
 
@@ -76,6 +86,15 @@ class MyPlaceFragment : Fragment() {
         }
     }
 
+
+    private fun registerTakePicture() = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            viewModel.updateStateOnAddPicture()
+        } else {
+            viewModel.updateStateOnAddPicture(Exception("Picture was not taken"))
+        }
+    }
+
     private fun addPicture(uri: Uri? = null) {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val createdUri = createPictureFilePath()?.let { file ->
@@ -88,14 +107,6 @@ class MyPlaceFragment : Fragment() {
         val path = "JPEG_${timeStamp}_.jpg"
 
         viewModel.addPicture(uri = uri ?: createdUri, path = path)
-    }
-
-    private fun registerTakePicture() = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-            viewModel.updateStateOnAddPicture()
-        } else {
-            viewModel.updateStateOnAddPicture(Exception("Picture was not taken"))
-        }
     }
 
 
@@ -117,25 +128,25 @@ class MyPlaceFragment : Fragment() {
             null
         }
 
-    private fun updateImagePreview(state: MyPlaceViewModel.MyPlaceState) {
+    private fun updateImagePreview(state: PictureViewModel.MyPlaceState) {
         when (state) {
-            is MyPlaceViewModel.MyPlaceState.AddPictureError -> {
-                (activity as MyPlacesActivity).hideProgressBar()
+            is PictureViewModel.MyPlaceState.AddPictureError -> {
+                (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
-            is MyPlaceViewModel.MyPlaceState.AddPictureSuccess -> {
-                (activity as MyPlacesActivity).hideProgressBar()
-                binding.ivMyPlace.loadImageFromUri(requireActivity(), state.uris.lastOrNull())
+            is PictureViewModel.MyPlaceState.AddPictureSuccess -> {
+                (activity as PicturesActivity).hideProgressBar()
+                pictureListAdapter.updateDataset(state.pictures)
             }
-            MyPlaceViewModel.MyPlaceState.Loading -> {
-                (activity as MyPlacesActivity).showProgressBar()
+            PictureViewModel.MyPlaceState.Loading -> {
+                (activity as PicturesActivity).showProgressBar()
             }
-            is MyPlaceViewModel.MyPlaceState.UploadError -> {
-                (activity as MyPlacesActivity).hideProgressBar()
+            is PictureViewModel.MyPlaceState.UploadError -> {
+                (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
-            is MyPlaceViewModel.MyPlaceState.UploadSuccess -> {
-                (activity as MyPlacesActivity).hideProgressBar()
+            is PictureViewModel.MyPlaceState.UploadSuccess -> {
+                (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_SHORT).show()
             }
         }
@@ -164,6 +175,6 @@ class MyPlaceFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = MyPlaceFragment()
+        fun newInstance() = PicturesFragment()
     }
 }

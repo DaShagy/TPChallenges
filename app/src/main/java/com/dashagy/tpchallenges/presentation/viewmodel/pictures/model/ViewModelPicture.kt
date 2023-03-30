@@ -1,4 +1,4 @@
-package com.dashagy.tpchallenges.presentation.viewmodel.places.model
+package com.dashagy.tpchallenges.presentation.viewmodel.pictures.model
 
 import android.net.Uri
 

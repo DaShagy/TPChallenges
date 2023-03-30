@@ -1,4 +1,4 @@
-package com.dashagy.tpchallenges.presentation.viewmodel.places
+package com.dashagy.tpchallenges.presentation.viewmodel.pictures
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
@@ -7,14 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashagy.domain.useCases.UploadImageToServiceUseCase
 import com.dashagy.domain.utils.Result
-import com.dashagy.tpchallenges.presentation.viewmodel.places.model.ViewModelPicture
+import com.dashagy.tpchallenges.presentation.viewmodel.pictures.model.ViewModelPicture
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MyPlaceViewModel @Inject constructor(
+class PictureViewModel @Inject constructor(
     private val uploadImageToServiceUseCase: UploadImageToServiceUseCase
 ): ViewModel() {
 
@@ -52,22 +52,19 @@ class MyPlaceViewModel @Inject constructor(
 
     fun updateStateOnAddPicture(exception: Exception? = null) {
         exception?.let {
-            _myPlaceState.postValue(
-                MyPlaceState.AddPictureError(it)
-            )
+            _myPlaceState.value = MyPlaceState.AddPictureError(it)
             return
         }
 
         if (addedPictures.isNotEmpty()){
-            _myPlaceState.postValue(
-                MyPlaceState.AddPictureSuccess(addedPictures.map { it.localUri })
-            )
+            _myPlaceState.value = MyPlaceState.AddPictureSuccess(addedPictures)
             return
         }
 
-        _myPlaceState.postValue(
-            MyPlaceState.AddPictureError(Exception("Couldn't add picture"))
+        _myPlaceState.value = MyPlaceState.AddPictureError(
+            Exception("Couldn't add picture")
         )
+
     }
 
     fun addPicture(uri: Uri?, path: String) {
@@ -85,7 +82,7 @@ class MyPlaceViewModel @Inject constructor(
     sealed class MyPlaceState {
         class UploadSuccess(val downloadUrl: String): MyPlaceState()
         class UploadError(val exception: Exception): MyPlaceState()
-        class AddPictureSuccess(val uris: List<Uri>): MyPlaceState()
+        class AddPictureSuccess(val pictures: List<ViewModelPicture>): MyPlaceState()
         class AddPictureError(val exception: Exception): MyPlaceState()
         object Loading: MyPlaceState()
     }

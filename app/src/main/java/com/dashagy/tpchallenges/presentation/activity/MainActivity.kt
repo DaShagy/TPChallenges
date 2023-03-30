@@ -5,9 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dashagy.tpchallenges.databinding.ActivityMainBinding
 import com.dashagy.tpchallenges.presentation.fragments.MovieDetailsFragment
@@ -28,7 +25,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onMenuChangeActivityPressed() {
-        startActivity(Intent(this, MyPlacesActivity::class.java))
+        startActivity(Intent(this, PicturesActivity::class.java))
     }
 
     fun replaceFragment(fragment: Fragment) {
