@@ -37,8 +37,6 @@ class MyPlaceFragment : Fragment() {
     private lateinit var cameraRequestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
 
-    private var fileUri: Uri? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pickVisualMediaLauncher = registerPickVisualMedia()
@@ -62,32 +60,41 @@ class MyPlaceFragment : Fragment() {
     }
 
     private fun registerPickVisualMedia() = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        fileUri = uri
-        viewModel.updateStateOnAddPicture(uri)
+        uri?.let {
+            addPicture(uri)
+            viewModel.updateStateOnAddPicture()
+        } ?: viewModel.updateStateOnAddPicture(Exception("Picture was not added"))
     }
 
     private fun registerCameraPermission() = registerForActivityResult(ActivityResultContracts.RequestPermission()){ isGranted ->
         if (isGranted) {
-            fileUri = createPictureFilePath()?.let { file ->
-                FileProvider.getUriForFile(
-                    requireContext(),
-                    "${requireContext().packageName}.fileProvider",
-                    file
-                )
-            }
-
-            fileUri?.let { takePictureLauncher.launch(it) }
-
+            addPicture()
+            val picture = viewModel.getLastAddedPicture()
+            picture?.let { takePictureLauncher.launch(picture.localUri) }
         } else {
             Toast.makeText(requireActivity(), "Permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
+    private fun addPicture(uri: Uri? = null) {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val createdUri = createPictureFilePath()?.let { file ->
+            FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileProvider",
+                file
+            )
+        }
+        val path = "JPEG_${timeStamp}_.jpg"
+
+        viewModel.addPicture(uri = uri ?: createdUri, path = path)
+    }
+
     private fun registerTakePicture() = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            viewModel.updateStateOnAddPicture(fileUri)
+            viewModel.updateStateOnAddPicture()
         } else {
-            viewModel.updateStateOnAddPicture(null, exception = Exception("Picture was not taken"))
+            viewModel.updateStateOnAddPicture(Exception("Picture was not taken"))
         }
     }
 
@@ -118,17 +125,18 @@ class MyPlaceFragment : Fragment() {
             }
             is MyPlaceViewModel.MyPlaceState.AddPictureSuccess -> {
                 (activity as MyPlacesActivity).hideProgressBar()
-                binding.ivMyPlace.loadImageFromUri(requireActivity(), state.uri)
+                binding.ivMyPlace.loadImageFromUri(requireActivity(), state.uris.lastOrNull())
             }
             MyPlaceViewModel.MyPlaceState.Loading -> {
                 (activity as MyPlacesActivity).showProgressBar()
             }
             is MyPlaceViewModel.MyPlaceState.UploadError -> {
                 (activity as MyPlacesActivity).hideProgressBar()
+                Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
             is MyPlaceViewModel.MyPlaceState.UploadSuccess -> {
                 (activity as MyPlacesActivity).hideProgressBar()
-                Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_LONG).show()
+                Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -151,14 +159,7 @@ class MyPlaceFragment : Fragment() {
     }
 
     private fun onUploadImageButtonPressed() {
-        fileUri?.let {
-            viewModel.uploadImage(it, createFilePath())
-        }
-    }
-    private fun createFilePath(): String {
-        val timeStamp: String =
-            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        return "JPEG_${timeStamp}_.jpg"
+        viewModel.uploadImages()
     }
 
     companion object {

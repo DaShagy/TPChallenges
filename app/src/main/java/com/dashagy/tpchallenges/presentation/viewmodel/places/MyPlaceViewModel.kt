@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashagy.domain.useCases.UploadImageToServiceUseCase
 import com.dashagy.domain.utils.Result
+import com.dashagy.tpchallenges.presentation.viewmodel.places.model.ViewModelPicture
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,16 +22,17 @@ class MyPlaceViewModel @Inject constructor(
     val myPlaceState: LiveData<MyPlaceState>
         get() = _myPlaceState
 
-    fun uploadImage(
-        imageUri: Uri,
-        fileName: String
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    private val addedPictures: MutableList<ViewModelPicture> = mutableListOf()
+
+    fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
         _myPlaceState.postValue(MyPlaceState.Loading)
-        uploadImageToServiceUseCase(
-            imageUri.toString(),
-            fileName,
-            ::updateStateOnUploadPicture
-        )
+        addedPictures.forEach {picture ->
+            uploadImageToServiceUseCase(
+                picture.localUri.toString(),
+                picture.storagePath,
+                ::updateStateOnUploadPicture
+            )
+        }
     }
 
     private fun updateStateOnUploadPicture(result: Result<String>) {
@@ -48,24 +50,42 @@ class MyPlaceViewModel @Inject constructor(
         }
     }
 
-    fun updateStateOnAddPicture(uri: Uri?, exception: Exception? = null) {
-        uri?.let {
-            _myPlaceState.postValue(
-                MyPlaceState.AddPictureSuccess(it)
-            )
-        } ?: exception?.let {
+    fun updateStateOnAddPicture(exception: Exception? = null) {
+        exception?.let {
             _myPlaceState.postValue(
                 MyPlaceState.AddPictureError(it)
             )
-        } ?: _myPlaceState.postValue(
+            return
+        }
+
+        if (addedPictures.isNotEmpty()){
+            _myPlaceState.postValue(
+                MyPlaceState.AddPictureSuccess(addedPictures.map { it.localUri })
+            )
+            return
+        }
+
+        _myPlaceState.postValue(
             MyPlaceState.AddPictureError(Exception("Couldn't add picture"))
         )
+    }
+
+    fun addPicture(uri: Uri?, path: String) {
+        uri?.let {
+            addedPictures.add(
+                ViewModelPicture(it, path)
+            )
+        }
+    }
+
+    fun getLastAddedPicture(): ViewModelPicture? {
+        return if (addedPictures.isNotEmpty()) addedPictures.last() else null
     }
 
     sealed class MyPlaceState {
         class UploadSuccess(val downloadUrl: String): MyPlaceState()
         class UploadError(val exception: Exception): MyPlaceState()
-        class AddPictureSuccess(val uri: Uri): MyPlaceState()
+        class AddPictureSuccess(val uris: List<Uri>): MyPlaceState()
         class AddPictureError(val exception: Exception): MyPlaceState()
         object Loading: MyPlaceState()
     }
