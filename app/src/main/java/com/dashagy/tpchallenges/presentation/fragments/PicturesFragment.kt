@@ -62,9 +62,15 @@ class PicturesFragment : Fragment() {
         }
 
         binding.btnAddPictures.setOnClickListener { onAddImageButtonPressed() }
-        binding.btnUploadPictures.setOnClickListener { onUploadImageButtonPressed() }
+        binding.btnUploadPictures.apply {
+            setOnClickListener { onUploadImageButtonPressed() }
+            isEnabled = false
+        }
 
         viewModel.picturesState.observe(viewLifecycleOwner, ::updateImagePreview)
+        viewModel.isPictureListEmpty.observe(viewLifecycleOwner) { isEmpty ->
+            binding.btnUploadPictures.isEnabled = !isEmpty
+        }
 
         return binding.root
     }

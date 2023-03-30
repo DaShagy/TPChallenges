@@ -22,11 +22,15 @@ class PictureViewModel @Inject constructor(
     val picturesState: LiveData<PicturesState>
         get() = _picturesState
 
-    private val addedPictures: MutableList<ViewModelPicture> = mutableListOf()
+    private var _isPictureListEmpty: MutableLiveData<Boolean> = MutableLiveData(true)
+    val isPictureListEmpty
+        get() = _isPictureListEmpty
+
+    private val pictureList: MutableList<ViewModelPicture> = mutableListOf()
 
     fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
         _picturesState.postValue(PicturesState.Loading)
-        addedPictures.forEach {picture ->
+        pictureList.forEach { picture ->
             uploadImageToServiceUseCase(
                 picture.localUri.toString(),
                 picture.storagePath,
@@ -57,8 +61,8 @@ class PictureViewModel @Inject constructor(
             return
         }
 
-        if (addedPictures.isNotEmpty()){
-            _picturesState.value = PicturesState.AddPictureSuccess(addedPictures)
+        if (pictureList.isNotEmpty()){
+            _picturesState.value = PicturesState.AddPictureSuccess(pictureList)
             return
         }
 
@@ -72,17 +76,18 @@ class PictureViewModel @Inject constructor(
         _picturesState.value = PicturesState.Loading
         uri?.let {
             val picture = ViewModelPicture(it, path)
-            if (!addedPictures.any { addedPicture -> addedPicture.localUri == it }) {
-                addedPictures.add(picture)
+            if (!pictureList.any { addedPicture -> addedPicture.localUri == it }) {
+                pictureList.add(picture)
                 updateStateOnAddPicture()
             } else {
                 updateStateOnAddPicture(Exception("Picture already loaded"))
             }
         }
+        _isPictureListEmpty.value = pictureList.isEmpty()
     }
 
     fun getLastAddedPicture(): ViewModelPicture? {
-        return if (addedPictures.isNotEmpty()) addedPictures.last() else null
+        return if (pictureList.isNotEmpty()) pictureList.last() else null
     }
 
 
