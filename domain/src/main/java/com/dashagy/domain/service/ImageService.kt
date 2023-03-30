@@ -4,7 +4,8 @@ import com.dashagy.domain.utils.Result
 
 interface ImageService {
     fun uploadImage(
-        filepath: String,
+        imageUri: String,
+        fileName: String,
         callback: (Result<String>) -> Unit
     )
 }

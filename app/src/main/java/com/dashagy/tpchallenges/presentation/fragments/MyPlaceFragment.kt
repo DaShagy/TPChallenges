@@ -145,7 +145,14 @@ class MyPlaceFragment : Fragment() {
     }
 
     private fun onUploadImageButtonPressed() {
-        viewModel.uploadImage(fileUri.toString())
+        fileUri?.let {
+            viewModel.uploadImage(it, createFilePath())
+        }
+    }
+    private fun createFilePath(): String {
+        val timeStamp: String =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        return "JPEG_${timeStamp}_.jpg"
     }
 
     companion object {

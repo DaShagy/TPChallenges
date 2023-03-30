@@ -7,7 +7,8 @@ class UploadImageToServiceUseCase(
     private val service: ImageService
 ) {
     operator fun invoke(
-        filepath: String,
+        imageUri: String,
+        fileName: String,
         callback: (Result<String>) -> Unit
-    ) = service.uploadImage(filepath, callback)
+    ) = service.uploadImage(imageUri, fileName, callback)
 }

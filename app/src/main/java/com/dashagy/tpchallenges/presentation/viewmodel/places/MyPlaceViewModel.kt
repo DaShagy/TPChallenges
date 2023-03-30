@@ -21,9 +21,16 @@ class MyPlaceViewModel @Inject constructor(
     val myPlaceState: LiveData<MyPlaceState>
         get() = _myPlaceState
 
-    fun uploadImage(filepath: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun uploadImage(
+        imageUri: Uri,
+        fileName: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
         _myPlaceState.postValue(MyPlaceState.Loading)
-        uploadImageToServiceUseCase(filepath, ::updateStateOnUploadPicture)
+        uploadImageToServiceUseCase(
+            imageUri.toString(),
+            fileName,
+            ::updateStateOnUploadPicture
+        )
     }
 
     private fun updateStateOnUploadPicture(result: Result<String>) {
