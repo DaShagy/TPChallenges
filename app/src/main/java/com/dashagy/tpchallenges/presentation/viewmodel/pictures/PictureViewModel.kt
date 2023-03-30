@@ -50,21 +50,16 @@ class PictureViewModel @Inject constructor(
         }
     }
 
-    fun updateStateOnAddPicture(exception: Exception? = null) {
+    fun updateStateOnAddPicture(pic: Picture?, exception: Exception? = null) {
+
         _picturesState.value = PicturesState.Loading
-        exception?.let {
-            _picturesState.value = PicturesState.AddPictureError(it)
-            return
-        }
 
-        if (pictureList.isNotEmpty()){
-            _picturesState.value = PicturesState.AddPictureSuccess(pictureList)
-            return
-        }
-
-        _picturesState.value = PicturesState.AddPictureError(
-            Exception("Couldn't add picture")
-        )
+        _picturesState.value =
+            pic?.let { picture ->
+                PicturesState.AddPictureSuccess(picture)
+            } ?: exception?.let { e ->
+                PicturesState.AddPictureError(e)
+            } ?: PicturesState.AddPictureError(Exception("Couldn't add picture"))
 
     }
 
@@ -74,9 +69,9 @@ class PictureViewModel @Inject constructor(
             val picture = Picture(it.toString(), path)
             if (!pictureList.any { addedPicture -> addedPicture.localUri == it.toString() }) {
                 pictureList.add(picture)
-                updateStateOnAddPicture()
+                updateStateOnAddPicture(picture)
             } else {
-                updateStateOnAddPicture(Exception("Picture already loaded"))
+                updateStateOnAddPicture(null, Exception("Picture already loaded"))
             }
         }
         _isPictureListEmpty.value = pictureList.isEmpty()
@@ -90,7 +85,7 @@ class PictureViewModel @Inject constructor(
     sealed class PicturesState {
         class UploadSuccess(val downloadUrl: String): PicturesState()
         class UploadError(val exception: Exception): PicturesState()
-        class AddPictureSuccess(val pictures: List<Picture>): PicturesState()
+        class AddPictureSuccess(val picture: Picture): PicturesState()
         class AddPictureError(val exception: Exception): PicturesState()
         object Loading: PicturesState()
     }

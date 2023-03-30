@@ -80,7 +80,7 @@ class PicturesFragment : Fragment() {
             uris.forEachIndexed { index, uri ->
                 addPicture(uri, index)
             }
-        } else viewModel.updateStateOnAddPicture(Exception("Picture was not added"))
+        } else viewModel.updateStateOnAddPicture(null, Exception("Picture was not added"))
     }
 
     private fun registerCameraPermission() = registerForActivityResult(ActivityResultContracts.RequestPermission()){ isGranted ->
@@ -96,9 +96,9 @@ class PicturesFragment : Fragment() {
 
     private fun registerTakePicture() = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            viewModel.updateStateOnAddPicture()
+            viewModel.updateStateOnAddPicture(viewModel.getLastAddedPicture())
         } else {
-            viewModel.updateStateOnAddPicture(Exception("Picture was not taken"))
+            viewModel.updateStateOnAddPicture(null, Exception("Picture was not taken"))
         }
     }
 
@@ -143,7 +143,7 @@ class PicturesFragment : Fragment() {
             }
             is PictureViewModel.PicturesState.AddPictureSuccess -> {
                 (activity as PicturesActivity).hideProgressBar()
-                pictureListAdapter.updateDataset(state.pictures)
+                pictureListAdapter.addPicture(state.picture)
             }
             PictureViewModel.PicturesState.Loading -> {
                 (activity as PicturesActivity).showProgressBar()

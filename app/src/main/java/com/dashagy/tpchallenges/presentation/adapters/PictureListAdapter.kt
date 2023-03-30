@@ -13,7 +13,14 @@ class PictureListAdapter: RecyclerView.Adapter<PictureListAdapter.PictureViewHol
 
     private var dataset: List<Picture> = listOf()
 
-    fun updateDataset(pictureList: List<Picture>){
+    fun addPicture(picture: Picture) {
+        val newPictureList = dataset.toMutableList().apply {
+            if (!any { pic -> pic.localUri == picture.localUri }) add(picture)
+        }
+        updateDataset(newPictureList)
+    }
+
+    private fun updateDataset(pictureList: List<Picture>){
         val oldPictureList = dataset
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(
             PictureListsDiffCallback(oldPictureList, pictureList)
