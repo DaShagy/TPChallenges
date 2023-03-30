@@ -64,16 +64,17 @@ class PicturesFragment : Fragment() {
         binding.btnAddPictures.setOnClickListener { onAddImageButtonPressed() }
         binding.btnUploadPictures.setOnClickListener { onUploadImageButtonPressed() }
 
-        viewModel.myPlaceState.observe(viewLifecycleOwner, ::updateImagePreview)
+        viewModel.picturesState.observe(viewLifecycleOwner, ::updateImagePreview)
 
         return binding.root
     }
 
-    private fun registerPickVisualMedia() = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let {
-            addPicture(uri)
-            viewModel.updateStateOnAddPicture()
-        } ?: viewModel.updateStateOnAddPicture(Exception("Picture was not added"))
+    private fun registerPickVisualMedia() = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        if (uris.isNotEmpty()) {
+            uris.forEachIndexed { index, uri ->
+                addPicture(uri, index)
+            }
+        } else viewModel.updateStateOnAddPicture(Exception("Picture was not added"))
     }
 
     private fun registerCameraPermission() = registerForActivityResult(ActivityResultContracts.RequestPermission()){ isGranted ->
@@ -95,7 +96,7 @@ class PicturesFragment : Fragment() {
         }
     }
 
-    private fun addPicture(uri: Uri? = null) {
+    private fun addPicture(uri: Uri? = null, counter: Int = 0) {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val createdUri = createPictureFilePath()?.let { file ->
             FileProvider.getUriForFile(
@@ -104,7 +105,7 @@ class PicturesFragment : Fragment() {
                 file
             )
         }
-        val path = "JPEG_${timeStamp}_.jpg"
+        val path = "JPEG_${timeStamp}_$counter.jpg"
 
         viewModel.addPicture(uri = uri ?: createdUri, path = path)
     }
@@ -128,24 +129,24 @@ class PicturesFragment : Fragment() {
             null
         }
 
-    private fun updateImagePreview(state: PictureViewModel.MyPlaceState) {
+    private fun updateImagePreview(state: PictureViewModel.PicturesState) {
         when (state) {
-            is PictureViewModel.MyPlaceState.AddPictureError -> {
+            is PictureViewModel.PicturesState.AddPictureError -> {
                 (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
-            is PictureViewModel.MyPlaceState.AddPictureSuccess -> {
+            is PictureViewModel.PicturesState.AddPictureSuccess -> {
                 (activity as PicturesActivity).hideProgressBar()
                 pictureListAdapter.updateDataset(state.pictures)
             }
-            PictureViewModel.MyPlaceState.Loading -> {
+            PictureViewModel.PicturesState.Loading -> {
                 (activity as PicturesActivity).showProgressBar()
             }
-            is PictureViewModel.MyPlaceState.UploadError -> {
+            is PictureViewModel.PicturesState.UploadError -> {
                 (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
-            is PictureViewModel.MyPlaceState.UploadSuccess -> {
+            is PictureViewModel.PicturesState.UploadSuccess -> {
                 (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_SHORT).show()
             }

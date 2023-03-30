@@ -18,14 +18,14 @@ class PictureViewModel @Inject constructor(
     private val uploadImageToServiceUseCase: UploadImageToServiceUseCase
 ): ViewModel() {
 
-    private var _myPlaceState: MutableLiveData<MyPlaceState> = MutableLiveData()
-    val myPlaceState: LiveData<MyPlaceState>
-        get() = _myPlaceState
+    private var _picturesState: MutableLiveData<PicturesState> = MutableLiveData()
+    val picturesState: LiveData<PicturesState>
+        get() = _picturesState
 
     private val addedPictures: MutableList<ViewModelPicture> = mutableListOf()
 
     fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
-        _myPlaceState.postValue(MyPlaceState.Loading)
+        _picturesState.postValue(PicturesState.Loading)
         addedPictures.forEach {picture ->
             uploadImageToServiceUseCase(
                 picture.localUri.toString(),
@@ -37,13 +37,13 @@ class PictureViewModel @Inject constructor(
 
     private fun updateStateOnUploadPicture(result: Result<String>) {
         when (result) {
-            is Result.Success -> _myPlaceState.postValue(
-                MyPlaceState.UploadSuccess(
+            is Result.Success -> _picturesState.postValue(
+                PicturesState.UploadSuccess(
                     result.data
                 )
             )
-            is Result.Error -> _myPlaceState.postValue(
-                MyPlaceState.UploadError(
+            is Result.Error -> _picturesState.postValue(
+                PicturesState.UploadError(
                     result.exception
                 )
             )
@@ -51,27 +51,33 @@ class PictureViewModel @Inject constructor(
     }
 
     fun updateStateOnAddPicture(exception: Exception? = null) {
+        _picturesState.value = PicturesState.Loading
         exception?.let {
-            _myPlaceState.value = MyPlaceState.AddPictureError(it)
+            _picturesState.value = PicturesState.AddPictureError(it)
             return
         }
 
         if (addedPictures.isNotEmpty()){
-            _myPlaceState.value = MyPlaceState.AddPictureSuccess(addedPictures)
+            _picturesState.value = PicturesState.AddPictureSuccess(addedPictures)
             return
         }
 
-        _myPlaceState.value = MyPlaceState.AddPictureError(
+        _picturesState.value = PicturesState.AddPictureError(
             Exception("Couldn't add picture")
         )
 
     }
 
     fun addPicture(uri: Uri?, path: String) {
+        _picturesState.value = PicturesState.Loading
         uri?.let {
-            addedPictures.add(
-                ViewModelPicture(it, path)
-            )
+            val picture = ViewModelPicture(it, path)
+            if (!addedPictures.any { addedPicture -> addedPicture.localUri == it }) {
+                addedPictures.add(picture)
+                updateStateOnAddPicture()
+            } else {
+                updateStateOnAddPicture(Exception("Picture already loaded"))
+            }
         }
     }
 
@@ -79,11 +85,12 @@ class PictureViewModel @Inject constructor(
         return if (addedPictures.isNotEmpty()) addedPictures.last() else null
     }
 
-    sealed class MyPlaceState {
-        class UploadSuccess(val downloadUrl: String): MyPlaceState()
-        class UploadError(val exception: Exception): MyPlaceState()
-        class AddPictureSuccess(val pictures: List<ViewModelPicture>): MyPlaceState()
-        class AddPictureError(val exception: Exception): MyPlaceState()
-        object Loading: MyPlaceState()
+
+    sealed class PicturesState {
+        class UploadSuccess(val downloadUrl: String): PicturesState()
+        class UploadError(val exception: Exception): PicturesState()
+        class AddPictureSuccess(val pictures: List<ViewModelPicture>): PicturesState()
+        class AddPictureError(val exception: Exception): PicturesState()
+        object Loading: PicturesState()
     }
 }
