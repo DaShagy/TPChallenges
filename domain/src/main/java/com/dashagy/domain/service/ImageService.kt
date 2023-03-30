@@ -1,11 +1,11 @@
 package com.dashagy.domain.service
 
+import com.dashagy.domain.entities.Picture
 import com.dashagy.domain.utils.Result
 
 interface ImageService {
     fun uploadImage(
-        imageUri: String,
-        fileName: String,
+        picture: Picture,
         callback: (Result<String>) -> Unit
     )
 }

@@ -1,6 +1,7 @@
 package com.dashagy.data.service
 
 import android.net.Uri
+import com.dashagy.domain.entities.Picture
 import com.dashagy.domain.service.ImageService
 import com.dashagy.domain.utils.Result
 import com.google.firebase.storage.FirebaseStorage
@@ -10,13 +11,12 @@ class ImageServiceImpl @Inject constructor (
     private val storage: FirebaseStorage
 ): ImageService {
     override fun uploadImage(
-        imageUri: String,
-        fileName: String,
+        picture: Picture,
         callback: (Result<String>) -> Unit
     ) {
 
-        val uri: Uri = Uri.parse(imageUri)
-        val childRef = storage.reference.child("images").child(fileName)
+        val uri: Uri = Uri.parse(picture.localUri)
+        val childRef = storage.reference.child("images").child(picture.storageFilepath)
 
         childRef
             .putFile(uri)

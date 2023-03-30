@@ -87,7 +87,7 @@ class PicturesFragment : Fragment() {
         if (isGranted) {
             addPicture()
             val picture = viewModel.getLastAddedPicture()
-            picture?.let { takePictureLauncher.launch(picture.localUri) }
+            picture?.let { takePictureLauncher.launch(Uri.parse(picture.localUri)) }
         } else {
             Toast.makeText(requireActivity(), "Permission denied", Toast.LENGTH_SHORT).show()
         }

@@ -1,23 +1,24 @@
 package com.dashagy.tpchallenges.presentation.adapters
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.dashagy.domain.entities.Picture
 import com.dashagy.tpchallenges.databinding.RecyclerviewPictureItemBinding
 import com.dashagy.tpchallenges.presentation.utils.loadImageFromUri
-import com.dashagy.tpchallenges.presentation.viewmodel.pictures.model.ViewModelPicture
 
 class PictureListAdapter: RecyclerView.Adapter<PictureListAdapter.PictureViewHolder>() {
 
-    private var dataset: List<ViewModelPicture> = listOf()
+    private var dataset: List<Picture> = listOf()
 
-    fun updateDataset(movieList: List<ViewModelPicture>){
-        val oldMovieList = dataset
+    fun updateDataset(pictureList: List<Picture>){
+        val oldPictureList = dataset
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(
-            PictureListsDiffCallback(oldMovieList, movieList)
+            PictureListsDiffCallback(oldPictureList, pictureList)
         )
-        dataset = movieList
+        dataset = pictureList
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -36,19 +37,19 @@ class PictureListAdapter: RecyclerView.Adapter<PictureListAdapter.PictureViewHol
         private val binding: RecyclerviewPictureItemBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(picture: ViewModelPicture) {
+        fun bind(picture: Picture) {
             with(binding){
                 ivPicture.loadImageFromUri(
                     ivPicture.context,
-                    picture.localUri
+                    Uri.parse(picture.localUri)
                 )
             }
         }
     }
 
     private class PictureListsDiffCallback(
-        val oldList: List<ViewModelPicture>,
-        val newList: List<ViewModelPicture>
+        val oldList: List<Picture>,
+        val newList: List<Picture>
     ) : DiffUtil.Callback(){
 
         override fun getOldListSize(): Int = oldList.size

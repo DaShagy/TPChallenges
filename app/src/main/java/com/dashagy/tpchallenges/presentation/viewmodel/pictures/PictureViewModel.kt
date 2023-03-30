@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashagy.domain.entities.Picture
 import com.dashagy.domain.useCases.UploadImageToServiceUseCase
 import com.dashagy.domain.utils.Result
-import com.dashagy.tpchallenges.presentation.viewmodel.pictures.model.ViewModelPicture
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,16 +26,12 @@ class PictureViewModel @Inject constructor(
     val isPictureListEmpty
         get() = _isPictureListEmpty
 
-    private val pictureList: MutableList<ViewModelPicture> = mutableListOf()
+    private val pictureList: MutableList<Picture> = mutableListOf()
 
     fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
         _picturesState.postValue(PicturesState.Loading)
         pictureList.forEach { picture ->
-            uploadImageToServiceUseCase(
-                picture.localUri.toString(),
-                picture.storagePath,
-                ::updateStateOnUploadPicture
-            )
+            uploadImageToServiceUseCase(picture, ::updateStateOnUploadPicture)
         }
     }
 
@@ -75,8 +71,8 @@ class PictureViewModel @Inject constructor(
     fun addPicture(uri: Uri?, path: String) {
         _picturesState.value = PicturesState.Loading
         uri?.let {
-            val picture = ViewModelPicture(it, path)
-            if (!pictureList.any { addedPicture -> addedPicture.localUri == it }) {
+            val picture = Picture(it.toString(), path)
+            if (!pictureList.any { addedPicture -> addedPicture.localUri == it.toString() }) {
                 pictureList.add(picture)
                 updateStateOnAddPicture()
             } else {
@@ -86,7 +82,7 @@ class PictureViewModel @Inject constructor(
         _isPictureListEmpty.value = pictureList.isEmpty()
     }
 
-    fun getLastAddedPicture(): ViewModelPicture? {
+    fun getLastAddedPicture(): Picture? {
         return if (pictureList.isNotEmpty()) pictureList.last() else null
     }
 
@@ -94,7 +90,7 @@ class PictureViewModel @Inject constructor(
     sealed class PicturesState {
         class UploadSuccess(val downloadUrl: String): PicturesState()
         class UploadError(val exception: Exception): PicturesState()
-        class AddPictureSuccess(val pictures: List<ViewModelPicture>): PicturesState()
+        class AddPictureSuccess(val pictures: List<Picture>): PicturesState()
         class AddPictureError(val exception: Exception): PicturesState()
         object Loading: PicturesState()
     }
