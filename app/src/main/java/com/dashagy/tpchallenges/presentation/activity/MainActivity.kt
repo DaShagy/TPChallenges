@@ -26,6 +26,7 @@ class MainActivity : BaseActivity() {
 
     override fun onMenuChangeActivityPressed() {
         startActivity(Intent(this, PicturesActivity::class.java))
+        finish()
     }
 
     fun replaceFragment(fragment: Fragment) {
@@ -51,7 +52,7 @@ class MainActivity : BaseActivity() {
         with (supportFragmentManager) {
             when (fragments.last()) {
                 is MovieDetailsFragment -> popBackStack()
-                else -> super.onBackPressed()
+                else -> finish()
             }
         }
     }
