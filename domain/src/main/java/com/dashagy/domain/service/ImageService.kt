@@ -6,6 +6,6 @@ import com.dashagy.domain.utils.Result
 interface ImageService {
     fun uploadImage(
         picture: Picture,
-        callback: (Result<String>) -> Unit
+        callback: (Result<Picture>) -> Unit
     )
 }

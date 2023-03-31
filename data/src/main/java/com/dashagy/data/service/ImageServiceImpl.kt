@@ -12,7 +12,7 @@ class ImageServiceImpl @Inject constructor (
 ): ImageService {
     override fun uploadImage(
         picture: Picture,
-        callback: (Result<String>) -> Unit
+        callback: (Result<Picture>) -> Unit
     ) {
 
         val uri: Uri = Uri.parse(picture.localUri)
@@ -27,7 +27,7 @@ class ImageServiceImpl @Inject constructor (
                 childRef.downloadUrl
             }.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    callback(Result.Success(task.result.toString()))
+                    callback(Result.Success(picture.apply { downloadUri = task.result.toString() }))
                 } else {
                     callback(Result.Error(task.exception ?: Exception("Unknown Error")))
                 }

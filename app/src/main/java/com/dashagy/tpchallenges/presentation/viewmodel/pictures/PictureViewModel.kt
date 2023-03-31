@@ -35,15 +35,17 @@ class PictureViewModel @Inject constructor(
         }
     }
 
-    private fun updateStateOnUploadPicture(result: Result<String>) {
+    private fun updateStateOnUploadPicture(result: Result<Picture>) {
         when (result) {
-            is Result.Success -> _picturesState.postValue(
-                PicturesState.UploadSuccess(
-                    result.data
+            is Result.Success -> {
+                _picturesState.postValue(
+                    PicturesState.Success(
+                        result.data
+                    )
                 )
-            )
+            }
             is Result.Error -> _picturesState.postValue(
-                PicturesState.UploadError(
+                PicturesState.Error(
                     result.exception
                 )
             )
@@ -56,10 +58,10 @@ class PictureViewModel @Inject constructor(
 
         _picturesState.value =
             pic?.let { picture ->
-                PicturesState.AddPictureSuccess(picture)
+                PicturesState.Success(picture)
             } ?: exception?.let { e ->
-                PicturesState.AddPictureError(e)
-            } ?: PicturesState.AddPictureError(Exception("Couldn't add picture"))
+                PicturesState.Error(e)
+            } ?: PicturesState.Error(Exception("Couldn't add picture"))
 
     }
 
@@ -81,12 +83,9 @@ class PictureViewModel @Inject constructor(
         return if (pictureList.isNotEmpty()) pictureList.last() else null
     }
 
-
     sealed class PicturesState {
-        class UploadSuccess(val downloadUrl: String): PicturesState()
-        class UploadError(val exception: Exception): PicturesState()
-        class AddPictureSuccess(val picture: Picture): PicturesState()
-        class AddPictureError(val exception: Exception): PicturesState()
+        class Success(val picture: Picture): PicturesState()
+        class Error(val exception: Exception): PicturesState()
         object Loading: PicturesState()
     }
 }

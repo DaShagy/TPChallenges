@@ -9,6 +9,6 @@ class UploadImageToServiceUseCase(
 ) {
     operator fun invoke(
         picture: Picture,
-        callback: (Result<String>) -> Unit
+        callback: (Result<Picture>) -> Unit
     ) = service.uploadImage(picture, callback)
 }

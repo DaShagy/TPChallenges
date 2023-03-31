@@ -137,24 +137,16 @@ class PicturesFragment : Fragment() {
 
     private fun updateImagePreview(state: PictureViewModel.PicturesState) {
         when (state) {
-            is PictureViewModel.PicturesState.AddPictureError -> {
+            is PictureViewModel.PicturesState.Error -> {
                 (activity as PicturesActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
-            is PictureViewModel.PicturesState.AddPictureSuccess -> {
+            is PictureViewModel.PicturesState.Success -> {
                 (activity as PicturesActivity).hideProgressBar()
                 pictureListAdapter.addPicture(state.picture)
             }
             PictureViewModel.PicturesState.Loading -> {
                 (activity as PicturesActivity).showProgressBar()
-            }
-            is PictureViewModel.PicturesState.UploadError -> {
-                (activity as PicturesActivity).hideProgressBar()
-                Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
-            }
-            is PictureViewModel.PicturesState.UploadSuccess -> {
-                (activity as PicturesActivity).hideProgressBar()
-                Toast.makeText(requireActivity(), state.downloadUrl, Toast.LENGTH_SHORT).show()
             }
         }
     }
