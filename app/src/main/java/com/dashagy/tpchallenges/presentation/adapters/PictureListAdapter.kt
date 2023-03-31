@@ -12,7 +12,7 @@ import com.dashagy.tpchallenges.presentation.utils.loadImageFromUri
 class PictureListAdapter: RecyclerView.Adapter<PictureListAdapter.PictureViewHolder>() {
 
     private var dataset: List<Picture> = listOf()
-    
+
     fun updateDataset(pictureList: List<Picture>){
         val oldPictureList = dataset
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(

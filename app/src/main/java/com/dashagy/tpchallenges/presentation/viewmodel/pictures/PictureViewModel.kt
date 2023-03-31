@@ -26,6 +26,8 @@ class PictureViewModel @Inject constructor(
     val pictureList: LiveData<List<Picture>>
         get() = _pictureList
 
+    private var cameraPicture: Picture? = null
+
     fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
         _picturesState.postValue(PicturesState.Loading)
         pictureList.value?.forEach { picture ->
@@ -79,11 +81,15 @@ class PictureViewModel @Inject constructor(
         }
     }
 
-    fun getLastAddedPicture(): Picture? {
-        return pictureList.value?.let { pictures ->
-            if (pictures.isNotEmpty()) pictures.last()
-            else null
+    fun updateCameraPicture(uri: Uri, path:String) {
+        cameraPicture = Picture(uri.toString(), path)
+    }
+
+    fun addCameraPicture() {
+        cameraPicture?.let { picture ->
+            addPicture(Uri.parse(picture.localUri), picture.storageFilepath)
         }
+        cameraPicture = null
     }
 
     sealed class PicturesState {

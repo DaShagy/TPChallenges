@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,11 +19,8 @@ import com.dashagy.tpchallenges.databinding.FragmentPicturesBinding
 import com.dashagy.tpchallenges.presentation.activity.PicturesActivity
 import com.dashagy.tpchallenges.presentation.adapters.PictureListAdapter
 import com.dashagy.tpchallenges.presentation.viewmodel.pictures.PictureViewModel
+import com.dashagy.tpchallenges.utils.FileManager
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 @AndroidEntryPoint
 class PicturesFragment : Fragment() {
@@ -41,11 +36,13 @@ class PicturesFragment : Fragment() {
 
     private lateinit var pictureListAdapter: PictureListAdapter
 
+    private lateinit var fileManager: FileManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pickVisualMediaLauncher = registerPickVisualMedia()
-        cameraRequestPermissionLauncher = registerCameraPermission()
-        takePictureLauncher = registerTakePicture()
+
+        registerActivityResultContracts()
+        fileManager = FileManager(requireContext())
     }
 
     override fun onCreateView(
@@ -71,6 +68,12 @@ class PicturesFragment : Fragment() {
         return binding.root
     }
 
+    private fun registerActivityResultContracts(){
+        pickVisualMediaLauncher = registerPickVisualMedia()
+        cameraRequestPermissionLauncher = registerCameraPermission()
+        takePictureLauncher = registerTakePicture()
+    }
+
     private fun registerPickVisualMedia() = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
             uris.forEachIndexed { index, uri ->
@@ -81,55 +84,48 @@ class PicturesFragment : Fragment() {
 
     private fun registerCameraPermission() = registerForActivityResult(ActivityResultContracts.RequestPermission()){ isGranted ->
         if (isGranted) {
-            addPicture()
-            val picture = viewModel.getLastAddedPicture()
-            picture?.let { takePictureLauncher.launch(Uri.parse(picture.localUri)) }
+            with(fileManager.createImageLocalUri()) {
+                first?.let { uri ->
+                    val path = createStoragePath(second)
+                    viewModel.updateCameraPicture(uri, path)
+                    launchCamera(uri)
+                }
+            }
         } else {
             Toast.makeText(requireActivity(), "Permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
-
     private fun registerTakePicture() = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            viewModel.updateStateOnAddPicture(viewModel.getLastAddedPicture())
+            viewModel.addCameraPicture()
         } else {
             viewModel.updateStateOnAddPicture(null, Exception("Picture was not taken"))
         }
     }
 
-    private fun addPicture(uri: Uri? = null, counter: Int = 0) {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val createdUri = createPictureFilePath()?.let { file ->
-            FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.fileProvider",
-                file
-            )
-        }
-        val path = "JPEG_${timeStamp}_$counter.jpg"
-
-        viewModel.addPicture(uri = uri ?: createdUri, path = path)
-    }
-
-
-    private fun takePictureFromCamera() {
+    private fun launchCameraPermission() {
         cameraRequestPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    private fun selectPictureFromGallery() {
+    private fun launchCamera(uri: Uri){
+        takePictureLauncher.launch(uri)
+    }
+
+    private fun launchGalleryPicker() {
         pickVisualMediaLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    private fun createPictureFilePath(): File? =
-        try {
-            val timeStamp: String =
-                SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            val storageDir: File? = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
-        } catch (e: IOException) {
-            null
+    private fun addPicture(uri: Uri? = null, counter: Int = 0) {
+        with (fileManager.createImageLocalUri()) {
+            val path = createStoragePath(second, counter)
+            viewModel.addPicture(uri = uri ?: first, path = path)
         }
+    }
+
+    private fun createStoragePath(timestamp: String, counter: Int = 0) =
+        "JPEG_${timestamp}_${counter}_.jpg"
+
 
     private fun updateImagePreview(state: PictureViewModel.PicturesState) {
         when (state) {
@@ -161,8 +157,8 @@ class PicturesFragment : Fragment() {
                 )
             ) { _, which ->
                 when (which) {
-                    0 -> selectPictureFromGallery()
-                    1 -> takePictureFromCamera()
+                    0 -> launchGalleryPicker()
+                    1 -> launchCameraPermission()
                 }
             }
         }.show()
