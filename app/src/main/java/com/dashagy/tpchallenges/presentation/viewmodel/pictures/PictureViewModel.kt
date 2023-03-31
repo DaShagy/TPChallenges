@@ -22,15 +22,13 @@ class PictureViewModel @Inject constructor(
     val picturesState: LiveData<PicturesState>
         get() = _picturesState
 
-    private var _isPictureListEmpty: MutableLiveData<Boolean> = MutableLiveData(true)
-    val isPictureListEmpty
-        get() = _isPictureListEmpty
-
-    private val pictureList: MutableList<Picture> = mutableListOf()
+    private var _pictureList: MutableLiveData<List<Picture>> = MutableLiveData(listOf())
+    val pictureList: LiveData<List<Picture>>
+        get() = _pictureList
 
     fun uploadImages() = viewModelScope.launch(Dispatchers.IO) {
         _picturesState.postValue(PicturesState.Loading)
-        pictureList.forEach { picture ->
+        pictureList.value?.forEach { picture ->
             uploadImageToServiceUseCase(picture, ::updateStateOnUploadPicture)
         }
     }
@@ -39,9 +37,7 @@ class PictureViewModel @Inject constructor(
         when (result) {
             is Result.Success -> {
                 _picturesState.postValue(
-                    PicturesState.Success(
-                        result.data
-                    )
+                    PicturesState.Success
                 )
             }
             is Result.Error -> _picturesState.postValue(
@@ -57,8 +53,8 @@ class PictureViewModel @Inject constructor(
         _picturesState.value = PicturesState.Loading
 
         _picturesState.value =
-            pic?.let { picture ->
-                PicturesState.Success(picture)
+            pic?.let {
+                PicturesState.Success
             } ?: exception?.let { e ->
                 PicturesState.Error(e)
             } ?: PicturesState.Error(Exception("Couldn't add picture"))
@@ -69,22 +65,29 @@ class PictureViewModel @Inject constructor(
         _picturesState.value = PicturesState.Loading
         uri?.let {
             val picture = Picture(it.toString(), path)
-            if (!pictureList.any { addedPicture -> addedPicture.localUri == it.toString() }) {
-                pictureList.add(picture)
-                updateStateOnAddPicture(picture)
-            } else {
-                updateStateOnAddPicture(null, Exception("Picture already loaded"))
+
+            pictureList.value?.let { pictures ->
+                if (!pictures.any { addedPicture -> addedPicture.localUri == it.toString() }) {
+                    val tempList = pictures.toMutableList()
+                    tempList.add(picture)
+                    _pictureList.value = tempList
+                    updateStateOnAddPicture(picture)
+                } else {
+                    updateStateOnAddPicture(null, Exception("Picture already loaded"))
+                }
             }
         }
-        _isPictureListEmpty.value = pictureList.isEmpty()
     }
 
     fun getLastAddedPicture(): Picture? {
-        return if (pictureList.isNotEmpty()) pictureList.last() else null
+        return pictureList.value?.let { pictures ->
+            if (pictures.isNotEmpty()) pictures.last()
+            else null
+        }
     }
 
     sealed class PicturesState {
-        class Success(val picture: Picture): PicturesState()
+        object Success : PicturesState()
         class Error(val exception: Exception): PicturesState()
         object Loading: PicturesState()
     }

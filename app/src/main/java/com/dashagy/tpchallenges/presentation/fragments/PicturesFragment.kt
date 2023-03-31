@@ -16,6 +16,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import com.dashagy.domain.entities.Picture
 import com.dashagy.tpchallenges.databinding.FragmentPicturesBinding
 import com.dashagy.tpchallenges.presentation.activity.PicturesActivity
 import com.dashagy.tpchallenges.presentation.adapters.PictureListAdapter
@@ -62,15 +63,10 @@ class PicturesFragment : Fragment() {
         }
 
         binding.btnAddPictures.setOnClickListener { onAddImageButtonPressed() }
-        binding.btnUploadPictures.apply {
-            setOnClickListener { onUploadImageButtonPressed() }
-            isEnabled = false
-        }
+        binding.btnUploadPictures.setOnClickListener { onUploadImageButtonPressed() }
 
         viewModel.picturesState.observe(viewLifecycleOwner, ::updateImagePreview)
-        viewModel.isPictureListEmpty.observe(viewLifecycleOwner) { isEmpty ->
-            binding.btnUploadPictures.isEnabled = !isEmpty
-        }
+        viewModel.pictureList.observe(viewLifecycleOwner, ::updatePictureList)
 
         return binding.root
     }
@@ -143,12 +139,16 @@ class PicturesFragment : Fragment() {
             }
             is PictureViewModel.PicturesState.Success -> {
                 (activity as PicturesActivity).hideProgressBar()
-                pictureListAdapter.addPicture(state.picture)
             }
             PictureViewModel.PicturesState.Loading -> {
                 (activity as PicturesActivity).showProgressBar()
             }
         }
+    }
+
+    private fun updatePictureList(pictures: List<Picture>){
+        pictureListAdapter.updateDataset(pictures)
+        binding.btnUploadPictures.isEnabled = pictures.isNotEmpty()
     }
 
     private fun onAddImageButtonPressed() {

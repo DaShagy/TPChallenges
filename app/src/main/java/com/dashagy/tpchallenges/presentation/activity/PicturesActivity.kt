@@ -16,7 +16,7 @@ class PicturesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityPicturesBinding.inflate(layoutInflater)
-        addFragment(PicturesFragment.newInstance())
+        replaceFragment(PicturesFragment.newInstance())
         setContentView(binding.root)
     }
 
@@ -24,7 +24,7 @@ class PicturesActivity : BaseActivity() {
         onBackPressed()
     }
 
-    fun replaceFragment(fragment: Fragment) {
+    private fun replaceFragment(fragment: Fragment) {
         with (supportFragmentManager) {
             beginTransaction().replace(binding.fragmentCvPictures.id, fragment).addToBackStack(null).commit()
         }
@@ -32,7 +32,7 @@ class PicturesActivity : BaseActivity() {
 
     private fun addFragment(fragment: Fragment) {
         with (supportFragmentManager) {
-            beginTransaction().add(binding.fragmentCvPictures.id, fragment).commit()
+            beginTransaction().add(binding.fragmentCvPictures.id, fragment).addToBackStack(null).commit()
         }
     }
 

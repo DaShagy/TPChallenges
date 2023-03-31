@@ -20,7 +20,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
-        addFragment(MoviesListFragment.newInstance())
+        replaceFragment(MoviesListFragment.newInstance())
         setContentView(binding.root)
     }
 
@@ -36,7 +36,7 @@ class MainActivity : BaseActivity() {
 
     private fun addFragment(fragment: Fragment) {
         with (supportFragmentManager) {
-            beginTransaction().add(binding.fragmentCvMain.id, fragment).commit()
+            beginTransaction().add(binding.fragmentCvMain.id, fragment).addToBackStack(null).commit()
         }
     }
 

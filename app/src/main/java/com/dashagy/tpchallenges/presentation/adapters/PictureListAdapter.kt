@@ -12,15 +12,8 @@ import com.dashagy.tpchallenges.presentation.utils.loadImageFromUri
 class PictureListAdapter: RecyclerView.Adapter<PictureListAdapter.PictureViewHolder>() {
 
     private var dataset: List<Picture> = listOf()
-
-    fun addPicture(picture: Picture) {
-        val newPictureList = dataset.toMutableList().apply {
-            if (!any { pic -> pic.localUri == picture.localUri }) add(picture)
-        }
-        updateDataset(newPictureList)
-    }
-
-    private fun updateDataset(pictureList: List<Picture>){
+    
+    fun updateDataset(pictureList: List<Picture>){
         val oldPictureList = dataset
         val diffResult: DiffUtil.DiffResult = DiffUtil.calculateDiff(
             PictureListsDiffCallback(oldPictureList, pictureList)
