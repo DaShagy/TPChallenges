@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.dashagy.tpchallenges.databinding.ActivityPicturesBinding
+import com.dashagy.tpchallenges.presentation.fragments.MapFragment
 import com.dashagy.tpchallenges.presentation.fragments.PicturesFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,13 +27,22 @@ class PicturesActivity : BaseActivity() {
         finish()
     }
 
-    private fun replaceFragment(fragment: Fragment) {
+    override fun onBackPressed() {
+        with (supportFragmentManager) {
+            when (fragments.last()) {
+                is MapFragment -> popBackStack()
+                else -> finish()
+            }
+        }
+    }
+
+    fun replaceFragment(fragment: Fragment) {
         with (supportFragmentManager) {
             beginTransaction().replace(binding.fragmentCvPictures.id, fragment).addToBackStack(null).commit()
         }
     }
 
-    private fun addFragment(fragment: Fragment) {
+    fun addFragment(fragment: Fragment) {
         with (supportFragmentManager) {
             beginTransaction().add(binding.fragmentCvPictures.id, fragment).addToBackStack(null).commit()
         }

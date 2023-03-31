@@ -61,6 +61,7 @@ class PicturesFragment : Fragment() {
 
         binding.btnAddPictures.setOnClickListener { onAddImageButtonPressed() }
         binding.btnUploadPictures.setOnClickListener { onUploadImageButtonPressed() }
+        binding.btnGoToMap.setOnClickListener { onGoToMapButtonPressed() }
 
         viewModel.picturesState.observe(viewLifecycleOwner, ::updateImagePreview)
         viewModel.pictureList.observe(viewLifecycleOwner, ::updatePictureList)
@@ -166,6 +167,11 @@ class PicturesFragment : Fragment() {
 
     private fun onUploadImageButtonPressed() {
         viewModel.uploadImages()
+    }
+
+
+    private fun onGoToMapButtonPressed() {
+        (requireActivity() as PicturesActivity).replaceFragment(MapFragment.newInstance())
     }
 
     companion object {
