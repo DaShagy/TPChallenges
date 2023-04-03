@@ -1,10 +1,12 @@
 package com.dashagy.tpchallenges.presentation.fragments
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.os.Build
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Looper
+import android.os.IBinder
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,11 +18,32 @@ import androidx.fragment.app.viewModels
 import com.dashagy.domain.entities.Location
 import com.dashagy.tpchallenges.databinding.FragmentMapBinding
 import com.dashagy.tpchallenges.presentation.viewmodel.LocationViewModel
-import com.google.android.gms.location.*
+import com.dashagy.tpchallenges.service.LocationAndroidService
+import com.dashagy.tpchallenges.service.LocationAndroidService.Companion.ACTION_START
+import com.dashagy.tpchallenges.service.LocationAndroidService.Companion.ACTION_STOP
+import com.dashagy.tpchallenges.service.ServiceCallback
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MapFragment : Fragment() {
+class MapFragment : Fragment(), ServiceCallback {
+
+    private var locationAndroidService: LocationAndroidService? = null
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            locationAndroidService = (service as LocationAndroidService.LocationAndroidServiceBinder).getService()
+
+            locationAndroidService?.registerCallback(this@MapFragment)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            locationAndroidService?.unregisterCallback()
+
+            locationAndroidService = null
+        }
+
+    }
+
 
     private val viewModel: LocationViewModel by viewModels()
 
@@ -29,32 +52,49 @@ class MapFragment : Fragment() {
 
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
 
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
-    private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
-    private var lastLocation: LocationResult? = null
-
-    private var isServiceStarted: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         locationPermissionLauncher = registerLocationPermission()
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
-        binding.btnStartLocationService.setOnClickListener { launchLocationPermission() }
-        binding.btnStopLocationService.setOnClickListener { stopLocationUpdates() }
-        binding.btnSaveLocation.setOnClickListener { onSaveLocationBtnPressed() }
+        binding.btnStartLocationService.setOnClickListener { onStartLocationServiceButtonPressed() }
+        binding.btnStopLocationService.setOnClickListener { onStopLocationServiceButtonPressed() }
+        binding.btnSaveLocation.setOnClickListener { onSaveLocationButtonPressed() }
+
+        viewModel.isLocationAndroidServiceRunning.observe(viewLifecycleOwner){
+            binding.btnStopLocationService.isEnabled = it
+        }
+
+        val intent = Intent(requireContext(), LocationAndroidService::class.java)
+        requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        requireActivity().unbindService(serviceConnection)
+    }
+
+    private fun onStopLocationServiceButtonPressed(){
+        stopLocationUpdates()
+    }
+
+    private fun onStartLocationServiceButtonPressed(){
+        launchLocationPermission()
+    }
+
+    private fun onSaveLocationButtonPressed() {
+        viewModel.saveLocation(::showToast)
     }
 
     private fun registerLocationPermission() =
@@ -76,60 +116,34 @@ class MapFragment : Fragment() {
         )
     }
 
-    @SuppressLint("MissingPermission", "VisibleForTests")
     private fun startLocationUpdates() {
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult?) {
-                updateLastLocation(result)
+        requireContext().startService(
+            Intent(requireContext(), LocationAndroidService::class.java).apply {
+                action = ACTION_START
             }
-        }
-
-        locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 10_000
-            fastestInterval = 5_000
-        }
-
-        fusedLocationProviderClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
         )
-
-        updateIsServiceStarted(true)
     }
+
 
     private fun stopLocationUpdates() {
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-        updateIsServiceStarted(false)
-        updateLastLocation(null)
-    }
-
-    private fun updateIsServiceStarted(value: Boolean){
-        isServiceStarted = value
-        binding.btnStopLocationService.isEnabled = value
-    }
-
-    private fun updateLastLocation(location: LocationResult?){
-        lastLocation = location
-        binding.tvLocation.text = location?.let { "Lat: ${it.lastLocation.latitude}, Lon: ${it.lastLocation.longitude}" } ?: "Lat: , Lon:"
-    }
-
-    private fun onSaveLocationBtnPressed() {
-        lastLocation?.lastLocation?.let { location ->
-            viewModel.saveLocation(
-                Location(
-                    Build.ID,
-                    location.latitude,
-                    location.longitude
-                ),
-                ::showToast
-            )
-        }
+        requireContext().startService(
+            Intent(requireContext(), LocationAndroidService::class.java).apply {
+                action = ACTION_STOP
+            }
+        )
+        viewModel.updateLocation(null)
     }
 
     private fun showToast(string: String) {
         Toast.makeText(requireActivity(), string, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun updateIsServiceRunning(isServiceRunning: Boolean) {
+        viewModel.updateIsLocationRunning(isServiceRunning)
+    }
+
+    override fun setLocationFromService(location: Location?) {
+        viewModel.updateLocation(location)
     }
 
     companion object {

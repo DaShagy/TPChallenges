@@ -18,7 +18,7 @@ class TPChallengesApplication: Application() {
             val channel = NotificationChannel(
                 "channel_id",
                 "channel_name",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
