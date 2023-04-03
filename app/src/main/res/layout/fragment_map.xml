@@ -36,6 +36,17 @@
         app:layout_constraintTop_toBottomOf="@id/btn_stop_location_service"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_save_location"
         android:text="Location"/>
+
+    <Button
+        android:id="@+id/btn_save_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Save location" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

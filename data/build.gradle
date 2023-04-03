@@ -54,6 +54,9 @@ dependencies {
     //Firebase storage
     implementation 'com.google.firebase:firebase-storage-ktx:20.1.0'
 
+    //Firebase Firestore
+    implementation "com.google.firebase:firebase-firestore-ktx:24.4.5"
+
     //For Inject annotations, I think this shouldn't be here
     implementation "javax.inject:javax.inject:1"
 

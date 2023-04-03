@@ -1,10 +1,13 @@
 package com.dashagy.di
 
 import com.dashagy.data.service.ImageServiceImpl
+import com.dashagy.data.service.LocationServiceImpl
 import com.dashagy.data.service.MoviesServiceImpl
 import com.dashagy.data.service.api.TheMovieDatabaseAPI
 import com.dashagy.domain.service.ImageService
+import com.dashagy.domain.service.LocationService
 import com.dashagy.domain.service.MoviesService
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
@@ -25,5 +28,13 @@ object ServiceModule {
 
     @Provides
     @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
     fun provideImageService(storage: FirebaseStorage): ImageService = ImageServiceImpl(storage)
+
+    @Provides
+    @Singleton
+    fun provideLocationService(database: FirebaseFirestore): LocationService = LocationServiceImpl(database)
 }

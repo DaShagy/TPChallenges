@@ -2,10 +2,9 @@ package com.dashagy.di
 
 import com.dashagy.domain.repository.MoviesRepository
 import com.dashagy.domain.service.ImageService
+import com.dashagy.domain.service.LocationService
 import com.dashagy.domain.service.MoviesService
-import com.dashagy.domain.useCases.GetMovieByIdUseCase
-import com.dashagy.domain.useCases.SearchMoviesUseCase
-import com.dashagy.domain.useCases.UploadImageToServiceUseCase
+import com.dashagy.domain.useCases.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +22,11 @@ object UseCasesModule {
 
     @Provides
     @ViewModelScoped
+    fun provideGetPopularMoviesUseCase(repository: MoviesRepository, moviesService: MoviesService) =
+        GetPopularMoviesUseCase(repository, moviesService)
+
+    @Provides
+    @ViewModelScoped
     fun provideSearchMovieUseCase(repository: MoviesRepository, moviesService: MoviesService) =
         SearchMoviesUseCase(repository, moviesService)
 
@@ -30,4 +34,10 @@ object UseCasesModule {
     @ViewModelScoped
     fun provideUploadImageToServiceUseCase(imageService: ImageService) =
         UploadImageToServiceUseCase(imageService)
+
+    @Provides
+    @ViewModelScoped
+    fun provideSaveLocationToServiceUseCase(locationService: LocationService) =
+        SaveLocationToServiceUseCase(locationService)
+
 }
