@@ -16,7 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.dashagy.domain.entities.Picture
 import com.dashagy.tpchallenges.databinding.FragmentPicturesBinding
-import com.dashagy.tpchallenges.presentation.activity.PicturesActivity
+import com.dashagy.tpchallenges.presentation.activity.FirebaseActivity
 import com.dashagy.tpchallenges.presentation.adapters.PictureListAdapter
 import com.dashagy.tpchallenges.presentation.viewmodel.pictures.PictureViewModel
 import com.dashagy.tpchallenges.utils.FileManager
@@ -131,14 +131,14 @@ class PicturesFragment : Fragment() {
     private fun updateImagePreview(state: PictureViewModel.PicturesState) {
         when (state) {
             is PictureViewModel.PicturesState.Error -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
                 Toast.makeText(requireActivity(), state.exception.message, Toast.LENGTH_SHORT).show()
             }
             is PictureViewModel.PicturesState.Success -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
             }
             PictureViewModel.PicturesState.Loading -> {
-                (activity as PicturesActivity).showProgressBar()
+                (activity as FirebaseActivity).showProgressBar()
             }
         }
     }
@@ -171,7 +171,7 @@ class PicturesFragment : Fragment() {
 
 
     private fun onGoToMapButtonPressed() {
-        (requireActivity() as PicturesActivity).replaceFragment(MapFragment.newInstance())
+        (requireActivity() as FirebaseActivity).replaceFragment(LocationFragment.newInstance())
     }
 
     companion object {

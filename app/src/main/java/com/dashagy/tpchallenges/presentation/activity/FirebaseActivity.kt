@@ -5,12 +5,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.dashagy.tpchallenges.databinding.ActivityPicturesBinding
-import com.dashagy.tpchallenges.presentation.fragments.MapFragment
+import com.dashagy.tpchallenges.presentation.fragments.LocationFragment
 import com.dashagy.tpchallenges.presentation.fragments.PicturesFragment
+import com.tomtom.sdk.map.display.ui.MapFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class PicturesActivity : BaseActivity() {
+class FirebaseActivity : BaseActivity() {
 
     private var _binding: ActivityPicturesBinding? = null
     private val binding get() = _binding!!
@@ -30,7 +31,8 @@ class PicturesActivity : BaseActivity() {
     override fun onBackPressed() {
         with (supportFragmentManager) {
             when (fragments.last()) {
-                is MapFragment -> popBackStack()
+                is MapFragment,
+                is LocationFragment -> popBackStack()
                 else -> finish()
             }
         }

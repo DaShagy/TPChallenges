@@ -21,6 +21,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "API_IMAGE_BASE_URL", API_IMAGE_BASE_URL)
+        buildConfigField("String", "TOMTOM_API_KEY", TOMTOM_API_KEY)
     }
 
     buildTypes {
@@ -67,6 +68,11 @@ dependencies {
 
     //Location
     implementation "com.google.android.gms:play-services-location:17.0.0"
+
+    //TomTom maps
+    implementation ("com.tomtom.sdk.maps:map-display:0.3.1617") {
+        exclude group: "com.google.protobuf", module: "protobuf-java"
+    }
 
     //Unit Testing
     testImplementation 'junit:junit:4.13.2'

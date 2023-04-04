@@ -25,7 +25,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onMenuChangeActivityPressed() {
-        startActivity(Intent(this, PicturesActivity::class.java))
+        startActivity(Intent(this, FirebaseActivity::class.java))
         finish()
     }
 

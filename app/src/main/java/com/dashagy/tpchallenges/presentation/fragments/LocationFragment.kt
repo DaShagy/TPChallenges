@@ -10,13 +10,18 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import com.dashagy.tpchallenges.BuildConfig
 import com.dashagy.tpchallenges.databinding.FragmentMapBinding
-import com.dashagy.tpchallenges.presentation.activity.PicturesActivity
+import com.dashagy.tpchallenges.presentation.activity.FirebaseActivity
 import com.dashagy.tpchallenges.presentation.viewmodel.LocationViewModel
+import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.map.display.MapOptions
+import com.tomtom.sdk.map.display.camera.CameraOptions
+import com.tomtom.sdk.map.display.ui.MapFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MapFragment : Fragment() {
+class LocationFragment : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
 
@@ -64,29 +69,40 @@ class MapFragment : Fragment() {
     private fun updateUI(locationState: LocationViewModel.LocationState) {
         when (locationState) {
             is LocationViewModel.LocationState.Failure -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
                 Toast.makeText(requireContext(), locationState.exception.message, Toast.LENGTH_SHORT).show()
             }
             LocationViewModel.LocationState.Idle -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
                 binding.tvLocation.text = ""
                 binding.btnStartLocationService.isEnabled = true
                 binding.btnStopLocationService.isEnabled = false
                 binding.btnSaveLocation.isEnabled = false
             }
             LocationViewModel.LocationState.Loading -> {
-                (activity as PicturesActivity).showProgressBar()
+                (activity as FirebaseActivity).showProgressBar()
             }
             is LocationViewModel.LocationState.Running -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
                 binding.tvLocation.text = "${locationState.location?.id}, Lat: ${locationState.location?.latitude}, Lon: ${locationState.location?.longitude}"
                 binding.btnStartLocationService.isEnabled = false
                 binding.btnStopLocationService.isEnabled = true
                 binding.btnSaveLocation.isEnabled = true
             }
             is LocationViewModel.LocationState.Success -> {
-                (activity as PicturesActivity).hideProgressBar()
+                (activity as FirebaseActivity).hideProgressBar()
                 Toast.makeText(requireContext(), locationState.callbackResult, Toast.LENGTH_SHORT).show()
+                (activity as FirebaseActivity).replaceFragment(
+                    MapFragment.newInstance(
+                        mapOptions = MapOptions(
+                            mapKey = BuildConfig.TOMTOM_API_KEY,
+                            cameraOptions = CameraOptions(
+                                position = GeoPoint(locationState.location.latitude, locationState.location.longitude),
+                                zoom = 16.0
+                            )
+                        )
+                    )
+                )
             }
         }
     }
@@ -141,6 +157,6 @@ class MapFragment : Fragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance() = MapFragment()
+        fun newInstance() = LocationFragment()
     }
 }

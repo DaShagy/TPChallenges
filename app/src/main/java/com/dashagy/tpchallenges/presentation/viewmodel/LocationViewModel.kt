@@ -75,7 +75,9 @@ class LocationViewModel @Inject constructor(
             saveLocationToServiceUseCase(it) { result ->
                 when (result) {
                     is Result.Error -> _state.postValue(LocationState.Failure(result.exception))
-                    is Result.Success ->_state.postValue(LocationState.Success(result.data))
+                    is Result.Success ->_state.postValue(
+                        LocationState.Success(it, result.data)
+                    )
                 }
             }
         }
@@ -108,7 +110,7 @@ class LocationViewModel @Inject constructor(
         object Loading: LocationState()
         class Running(val location: Location?): LocationState()
         object Idle: LocationState()
-        class Success(val callbackResult: String): LocationState()
+        class Success(val location: Location, val callbackResult: String): LocationState()
         class Failure(val exception: Exception): LocationState()
     }
 
