@@ -14,24 +14,38 @@ import androidx.core.app.NotificationCompat
 import com.dashagy.domain.entities.Location
 import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.location.LocationClient
-import com.dashagy.tpchallenges.location.LocationClientImpl
-import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LocationAndroidService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private lateinit var locationClient: LocationClient
+    private var job: Job? = null
+
+    @Inject lateinit var locationClient: LocationClient
 
     private val binder = LocationAndroidServiceBinder()
-    private var callback: ServiceCallback? = null
+    private var callback: Callback? = null
 
     private lateinit var stopServicePendingIntent: PendingIntent
 
-    fun registerCallback(callback: ServiceCallback){
+    override fun onCreate() {
+        super.onCreate()
+
+        stopServicePendingIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, LocationAndroidService::class.java).apply { action = ACTION_STOP },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT } else { FLAG_UPDATE_CURRENT }
+        )
+    }
+
+    fun registerCallback(callback: Callback){
         this.callback = callback
     }
 
@@ -40,27 +54,6 @@ class LocationAndroidService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
-
-    override fun onCreate() {
-        super.onCreate()
-
-        locationClient = LocationClientImpl(
-            applicationContext,
-            LocationServices.getFusedLocationProviderClient(applicationContext)
-        )
-
-        stopServicePendingIntent = PendingIntent.getService(
-            this,
-            0,
-            Intent(
-                this,
-                LocationAndroidService::class.java
-            ).apply {
-                action = ACTION_STOP
-            },
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT } else { FLAG_UPDATE_CURRENT }
-        )
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when(intent?.action) {
@@ -71,38 +64,34 @@ class LocationAndroidService : Service() {
     }
 
     private fun start() {
-        var location: Location? = null
 
         val notification = NotificationCompat.Builder(this, "channel_id")
             .setContentTitle("Tracking location...")
-            .setContentText("Location: null")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setOngoing(true)
             .addAction(R.drawable.baseline_stop_24,"Stop", stopServicePendingIntent)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        locationClient
+        job = locationClient
             .getLocation(10_000L)
             .catch { e -> e.printStackTrace() }
-            .onEach {
-                location = it
-                callback?.setLocationFromService(location)
+            .onEach { location ->
+                callback?.onCallback(this, location, true)
                 val updatedNotification = notification.setContentText(
-                    "Lat: ${location?.latitude}, Long: ${location?.longitude}"
+                    "Lat: ${location.latitude}, Long: ${location.longitude}"
                 )
                 notificationManager.notify(1, updatedNotification.build())
             }
             .launchIn(serviceScope)
-
-        callback?.updateIsServiceRunning(isServiceRunning = true)
 
         startForeground(1, notification.build())
     }
 
     private fun stop(){
         stopForeground(true)
-        callback?.updateIsServiceRunning(isServiceRunning = false)
+        job?.cancel()
+        callback?.onCallback(this,null,false)
         stopSelf()
     }
 
@@ -113,6 +102,10 @@ class LocationAndroidService : Service() {
 
     inner class LocationAndroidServiceBinder: Binder(){
         fun getService(): LocationAndroidService = this@LocationAndroidService
+    }
+
+    interface Callback {
+        fun onCallback(service: LocationAndroidService, location: Location?, isServiceRunning: Boolean)
     }
 
     companion object {
