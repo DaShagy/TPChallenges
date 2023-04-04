@@ -11,13 +11,17 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
 import com.dashagy.tpchallenges.BuildConfig
+import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.databinding.FragmentMapBinding
 import com.dashagy.tpchallenges.presentation.activity.FirebaseActivity
 import com.dashagy.tpchallenges.presentation.viewmodel.LocationViewModel
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.map.display.camera.CameraOptions
+import com.tomtom.sdk.map.display.image.ImageFactory
+import com.tomtom.sdk.map.display.marker.MarkerOptions
 import com.tomtom.sdk.map.display.ui.MapFragment
+import com.tomtom.sdk.map.display.ui.MapReadyCallback
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -92,16 +96,32 @@ class LocationFragment : Fragment() {
             is LocationViewModel.LocationState.Success -> {
                 (activity as FirebaseActivity).hideProgressBar()
                 Toast.makeText(requireContext(), locationState.callbackResult, Toast.LENGTH_SHORT).show()
+
+                val geoPoint = GeoPoint(locationState.location.latitude, locationState.location.longitude)
+
                 (activity as FirebaseActivity).replaceFragment(
                     MapFragment.newInstance(
                         mapOptions = MapOptions(
                             mapKey = BuildConfig.TOMTOM_API_KEY,
                             cameraOptions = CameraOptions(
-                                position = GeoPoint(locationState.location.latitude, locationState.location.longitude),
+                                position = geoPoint,
                                 zoom = 16.0
                             )
                         )
-                    )
+                    ).apply {
+                        getMapAsync { map ->
+                            val markerOptions = MarkerOptions(
+                                coordinate = geoPoint,
+                                pinImage = ImageFactory.fromResource(R.drawable.baseline_push_pin_24),
+                                balloonText = "${geoPoint.latitude}, ${geoPoint.longitude}"
+                            )
+                            map.addMarker(markerOptions)
+
+                            map.addMarkerClickListener { marker ->
+                                if(!marker.isSelected()) marker.select()
+                            }
+                        }
+                    }
                 )
             }
         }
