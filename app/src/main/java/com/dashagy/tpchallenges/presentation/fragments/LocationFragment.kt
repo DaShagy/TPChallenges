@@ -10,11 +10,13 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import com.dashagy.domain.entities.Location
 import com.dashagy.tpchallenges.BuildConfig
 import com.dashagy.tpchallenges.R
-import com.dashagy.tpchallenges.databinding.FragmentMapBinding
+import com.dashagy.tpchallenges.databinding.FragmentLocationBinding
 import com.dashagy.tpchallenges.presentation.activity.FirebaseActivity
 import com.dashagy.tpchallenges.presentation.viewmodel.LocationViewModel
+import com.dashagy.tpchallenges.utils.TimeUtil.toDateString
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.map.display.camera.CameraOptions
@@ -28,7 +30,7 @@ class LocationFragment : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
 
-    private var _binding: FragmentMapBinding? = null
+    private var _binding: FragmentLocationBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<Array<String>>
@@ -44,11 +46,12 @@ class LocationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        _binding = FragmentLocationBinding.inflate(inflater, container, false)
 
         binding.btnStartLocationService.setOnClickListener { onStartLocationServiceButtonPressed() }
         binding.btnStopLocationService.setOnClickListener { onStopLocationServiceButtonPressed() }
         binding.btnSaveLocation.setOnClickListener { onSaveLocationButtonPressed() }
+        binding.btnShowMap.setOnClickListener { onShowMapButtonPressed() }
 
         return binding.root
     }
@@ -76,7 +79,7 @@ class LocationFragment : Fragment() {
             }
             is LocationViewModel.LocationState.Running -> {
                 (activity as FirebaseActivity).hideProgressBar()
-                binding.tvLocation.text = "${locationState.deviceId}, Lat: ${locationState.location?.latitude}, Lon: ${locationState.location?.longitude}"
+                binding.tvLocation.text = "Lat: ${locationState.location?.latitude}, Lon: ${locationState.location?.longitude}"
                 binding.btnStartLocationService.isEnabled = false
                 binding.btnStopLocationService.isEnabled = true
                 binding.btnSaveLocation.isEnabled = true
@@ -84,33 +87,6 @@ class LocationFragment : Fragment() {
             is LocationViewModel.LocationState.Success -> {
                 (activity as FirebaseActivity).hideProgressBar()
                 Toast.makeText(requireContext(), locationState.callbackResult, Toast.LENGTH_SHORT).show()
-
-                val geoPoint = GeoPoint(locationState.location.latitude, locationState.location.longitude)
-
-                (activity as FirebaseActivity).replaceFragment(
-                    MapFragment.newInstance(
-                        mapOptions = MapOptions(
-                            mapKey = BuildConfig.TOMTOM_API_KEY,
-                            cameraOptions = CameraOptions(
-                                position = geoPoint,
-                                zoom = 16.0
-                            )
-                        )
-                    ).apply {
-                        getMapAsync { map ->
-                            val markerOptions = MarkerOptions(
-                                coordinate = geoPoint,
-                                pinImage = ImageFactory.fromResource(R.drawable.baseline_push_pin_24),
-                                balloonText = "${geoPoint.latitude}, ${geoPoint.longitude}"
-                            )
-                            map.addMarker(markerOptions)
-
-                            map.addMarkerClickListener { marker ->
-                                if(!marker.isSelected()) marker.select()
-                            }
-                        }
-                    }
-                )
             }
         }
     }
@@ -130,6 +106,50 @@ class LocationFragment : Fragment() {
 
     private fun onSaveLocationButtonPressed() {
         viewModel.saveLocation()
+    }
+
+    private fun onShowMapButtonPressed() {
+        val locations = mutableListOf<Location>()
+
+        viewModel.getLocations(requireContext()) { deviceLocations ->
+            deviceLocations?.locations?.let { locations.addAll(it) }
+        }
+
+        (activity as FirebaseActivity).replaceFragment(
+            MapFragment.newInstance(
+                mapOptions = MapOptions(
+                    mapKey = BuildConfig.TOMTOM_API_KEY,
+                    cameraOptions = CameraOptions(
+                        zoom = 12.0
+                    )
+                )
+            ).apply {
+                getMapAsync { map ->
+                    locations.forEach{ location ->
+                        val markerOptions = MarkerOptions(
+                            coordinate = GeoPoint(location.latitude, location.longitude),
+                            pinImage = ImageFactory.fromResource(R.drawable.baseline_push_pin_24),
+                            balloonText = "Timestamp: ${location.timestamp.toDateString()}, ${location.latitude}, ${location.longitude}"
+                        )
+                        map.addMarker(markerOptions)
+
+                        map.addMarkerClickListener { marker ->
+                            if(!marker.isSelected()) marker.select()
+                        }
+
+
+                    }
+                    map.moveCamera(
+                        CameraOptions(
+                            position = GeoPoint(
+                                if (locations.isNotEmpty()) locations.map { it.latitude }.average() else 0.0,
+                                if (locations.isNotEmpty()) locations.map { it.longitude }.average() else 0.0,
+                            )
+                        )
+                    )
+                }
+            }
+        )
     }
 
     private fun registerLocationPermission() =

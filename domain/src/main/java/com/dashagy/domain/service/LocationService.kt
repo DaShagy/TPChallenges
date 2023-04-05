@@ -1,5 +1,6 @@
 package com.dashagy.domain.service
 
+import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
 import com.dashagy.domain.utils.Result
 
@@ -9,4 +10,6 @@ interface LocationService {
         location: Location,
         callback: (Result<String>) -> Unit
     )
+
+    fun getLocations(deviceId: String, callback: (Result<DeviceLocations>) -> Unit)
 }

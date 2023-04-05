@@ -12,9 +12,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
+import com.dashagy.domain.useCases.GetLocationsFromServiceUseCase
 import com.dashagy.domain.useCases.SaveLocationToServiceUseCase
 import com.dashagy.domain.utils.Result
 import com.dashagy.tpchallenges.service.LocationAndroidService
+import com.dashagy.tpchallenges.utils.DeviceUtils.getDeviceId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LocationViewModel @Inject constructor(
-    private val saveLocationToServiceUseCase: SaveLocationToServiceUseCase
+    private val saveLocationToServiceUseCase: SaveLocationToServiceUseCase,
+    private val getLocationsFromServiceUseCase: GetLocationsFromServiceUseCase
 ): ViewModel(), LocationAndroidService.Callback {
 
     private var locationAndroidService: WeakReference<LocationAndroidService>? = null
@@ -106,6 +109,15 @@ class LocationViewModel @Inject constructor(
 
     fun clearViewModel(){
         onCleared()
+    }
+
+    fun getLocations(context: Context, callback: (DeviceLocations?) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+        getLocationsFromServiceUseCase(getDeviceId(context)){ result ->
+            when (result){
+                is Result.Error -> callback(null)
+                is Result.Success -> callback(result.data)
+            }
+        }
     }
 
     sealed class LocationState{

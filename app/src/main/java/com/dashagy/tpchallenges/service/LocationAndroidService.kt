@@ -13,9 +13,12 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
+import com.dashagy.domain.useCases.SaveLocationToServiceUseCase
+import com.dashagy.domain.utils.Result
 import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.location.LocationClient
 import com.dashagy.tpchallenges.utils.DeviceUtils.getDeviceId
+import com.dashagy.tpchallenges.utils.TimeUtil.toDateString
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
@@ -30,6 +33,7 @@ class LocationAndroidService : Service() {
     private var job: Job? = null
 
     @Inject lateinit var locationClient: LocationClient
+    @Inject lateinit var saveLocationToServiceUseCase: SaveLocationToServiceUseCase
 
     private val binder = LocationAndroidServiceBinder()
     private var callback: Callback? = null
@@ -76,10 +80,29 @@ class LocationAndroidService : Service() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         job = locationClient
-            .getLocation(10_000L)
+            .getLocation()
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
+                val deviceId = getDeviceId(applicationContext)
                 callback?.onCallback(getDeviceId(applicationContext), location, true)
+                saveLocationToServiceUseCase(deviceId, location) { result ->
+                    val locationSavedNotification = when (result){
+                        is Result.Error -> {
+                            NotificationCompat.Builder(this, "channel_id")
+                                .setContentTitle("Couldn't save the following location")
+                                .setSmallIcon(R.drawable.ic_launcher_background)
+                                .setContentText("Latitude: ${location.latitude}, Longitude: ${location.longitude} on ${location.timestamp.toDateString()}")
+                        }
+                        is Result.Success -> {
+                            NotificationCompat.Builder(this, "channel_id")
+                                .setContentTitle(result.data)
+                                .setSmallIcon(R.drawable.ic_launcher_background)
+                                .setContentText("Latitude: ${location.latitude}, Longitude: ${location.longitude} on ${location.timestamp.toDateString()}")
+                        }
+                    }
+                    notificationManager.notify(2, locationSavedNotification.build())
+                }
+
                 val updatedNotification = notification.setContentText("Location Service is running")
                 notificationManager.notify(1, updatedNotification.build())
             }

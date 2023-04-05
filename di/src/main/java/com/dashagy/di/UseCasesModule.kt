@@ -40,4 +40,9 @@ object UseCasesModule {
     fun provideSaveLocationToServiceUseCase(locationService: LocationService) =
         SaveLocationToServiceUseCase(locationService)
 
+    @Provides
+    @ViewModelScoped
+    fun provideGetLocationsFromServiceUseCase(locationService: LocationService) =
+        GetLocationsFromServiceUseCase(locationService)
+
 }
