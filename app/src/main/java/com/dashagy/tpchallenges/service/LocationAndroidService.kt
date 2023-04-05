@@ -11,9 +11,11 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
 import com.dashagy.tpchallenges.R
 import com.dashagy.tpchallenges.location.LocationClient
+import com.dashagy.tpchallenges.utils.DeviceUtils.getDeviceId
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
@@ -77,10 +79,8 @@ class LocationAndroidService : Service() {
             .getLocation(10_000L)
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
-                callback?.onCallback(this, location, true)
-                val updatedNotification = notification.setContentText(
-                    "Lat: ${location.latitude}, Long: ${location.longitude}"
-                )
+                callback?.onCallback(getDeviceId(applicationContext), location, true)
+                val updatedNotification = notification.setContentText("Location Service is running")
                 notificationManager.notify(1, updatedNotification.build())
             }
             .launchIn(serviceScope)
@@ -91,7 +91,7 @@ class LocationAndroidService : Service() {
     private fun stop(){
         stopForeground(true)
         job?.cancel()
-        callback?.onCallback(this,null,false)
+        callback?.onCallback(null,null,false)
         stopSelf()
     }
 
@@ -105,7 +105,7 @@ class LocationAndroidService : Service() {
     }
 
     interface Callback {
-        fun onCallback(service: LocationAndroidService, location: Location?, isServiceRunning: Boolean)
+        fun onCallback(deviceId: String?, location: Location?, isServiceRunning: Boolean)
     }
 
     companion object {

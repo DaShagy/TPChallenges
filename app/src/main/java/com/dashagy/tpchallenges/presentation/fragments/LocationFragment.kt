@@ -21,7 +21,6 @@ import com.tomtom.sdk.map.display.camera.CameraOptions
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
 import com.tomtom.sdk.map.display.ui.MapFragment
-import com.tomtom.sdk.map.display.ui.MapReadyCallback
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -59,17 +58,6 @@ class LocationFragment : Fragment() {
         viewModel.state.observe(viewLifecycleOwner, ::updateUI)
     }
 
-
-    override fun onResume() {
-        super.onResume()
-        //Toast.makeText(requireActivity(), "Service: ${viewModel.service()?.get().toString()}", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //.makeText(requireActivity(), "Service: ${viewModel.service()?.get().toString()}", Toast.LENGTH_SHORT).show()
-    }
-
     private fun updateUI(locationState: LocationViewModel.LocationState) {
         when (locationState) {
             is LocationViewModel.LocationState.Failure -> {
@@ -88,7 +76,7 @@ class LocationFragment : Fragment() {
             }
             is LocationViewModel.LocationState.Running -> {
                 (activity as FirebaseActivity).hideProgressBar()
-                binding.tvLocation.text = "${locationState.location?.id}, Lat: ${locationState.location?.latitude}, Lon: ${locationState.location?.longitude}"
+                binding.tvLocation.text = "${locationState.deviceId}, Lat: ${locationState.location?.latitude}, Lon: ${locationState.location?.longitude}"
                 binding.btnStartLocationService.isEnabled = false
                 binding.btnStopLocationService.isEnabled = true
                 binding.btnSaveLocation.isEnabled = true

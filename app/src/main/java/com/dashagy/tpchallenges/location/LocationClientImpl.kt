@@ -7,7 +7,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.provider.Settings
+import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
+import com.dashagy.tpchallenges.utils.TimeUtil
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -50,13 +52,11 @@ class LocationClientImpl @Inject constructor(
                 override fun onLocationResult(result: LocationResult) {
                     super.onLocationResult(result)
                     result.locations.lastOrNull()?.let { location ->
-                        launch { send(
-                            Location(
-                                Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID),
-                                location.latitude,
-                                location.longitude
-                            )
-                        ) }
+                        launch { send(Location(
+                            location.latitude,
+                            location.longitude,
+                            TimeUtil.getTimestamp()
+                        )) }
                     }
                 }
             }

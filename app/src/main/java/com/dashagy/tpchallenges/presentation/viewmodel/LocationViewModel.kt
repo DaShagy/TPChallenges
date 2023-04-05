@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashagy.domain.entities.DeviceLocations
 import com.dashagy.domain.entities.Location
 import com.dashagy.domain.useCases.SaveLocationToServiceUseCase
 import com.dashagy.domain.utils.Result
@@ -67,17 +68,20 @@ class LocationViewModel @Inject constructor(
 
     fun saveLocation() = viewModelScope.launch(Dispatchers.IO) {
         val previousState = state
+        val deviceId = (state.value as? LocationState.Running)?.deviceId
         val location = (state.value as? LocationState.Running)?.location
 
         _state.postValue(LocationState.Loading)
 
-        location?.let {
-            saveLocationToServiceUseCase(it) { result ->
-                when (result) {
-                    is Result.Error -> _state.postValue(LocationState.Failure(result.exception))
-                    is Result.Success ->_state.postValue(
-                        LocationState.Success(it, result.data)
-                    )
+        deviceId?.let { id ->
+            location?.let { loc ->
+                saveLocationToServiceUseCase(id, loc) { result ->
+                    when (result) {
+                        is Result.Error -> _state.postValue(LocationState.Failure(result.exception))
+                        is Result.Success -> _state.postValue(
+                            LocationState.Success(loc, result.data)
+                        )
+                    }
                 }
             }
         }
@@ -88,11 +92,9 @@ class LocationViewModel @Inject constructor(
     }
 
 
-    override fun onCallback(service: LocationAndroidService, location: Location?, isServiceRunning: Boolean) {
-        Log.d("VIEWMODEL", locationAndroidService?.get().toString())
-        Log.d("VIEWMODEL", service.toString())
-        _state.postValue(
-            if (isServiceRunning) LocationState.Running(location)
+    override fun onCallback(deviceId: String?, location: Location?, isServiceRunning: Boolean) {
+                _state.postValue(
+            if (isServiceRunning) LocationState.Running(deviceId, location)
             else LocationState.Idle
         )
     }
@@ -108,7 +110,7 @@ class LocationViewModel @Inject constructor(
 
     sealed class LocationState{
         object Loading: LocationState()
-        class Running(val location: Location?): LocationState()
+        class Running(val deviceId: String?, val location: Location?): LocationState()
         object Idle: LocationState()
         class Success(val location: Location, val callbackResult: String): LocationState()
         class Failure(val exception: Exception): LocationState()
